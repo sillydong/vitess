@@ -19,12 +19,10 @@ package sqlparser
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"sync"
-
 	"github.com/dolthub/vitess/go/bytes2"
 	"github.com/dolthub/vitess/go/sqltypes"
 	"github.com/dolthub/vitess/go/vt/vterrors"
+	"io"
 )
 
 const (
@@ -32,13 +30,6 @@ const (
 	defaultBufSize = 4*1024
 	eofChar        = 0x100
 )
-
-var bufferPool = &sync.Pool{
-	New: func() interface{} {
-		bytes := make([]byte, defaultBufSize)
-		return bytes[:0]
-	},
-}
 
 // Tokenizer is the struct used to generate SQL
 // tokens for the parser.
@@ -62,6 +53,8 @@ type Tokenizer struct {
 	buf     []byte
 	bufPos  int
 	bufSize int
+
+	scanStringBuf []byte
 }
 
 // NewStringTokenizer creates a new Tokenizer for the
@@ -832,26 +825,27 @@ exit:
 	return token, buffer.Bytes()
 }
 
-func getBuffer() (*bytes2.Buffer, func()) {
+func (tkn *Tokenizer)getScanStringBuf() (*bytes2.Buffer, func()) {
 	const minBufferSize = 128
 
-	buffer := bytes2.NewBuffer(bufferPool.Get().([]byte))
+	if cap(tkn.scanStringBuf) < minBufferSize {
+		tkn.scanStringBuf = make([]byte, defaultBufSize)[:0]
+	}
+
+	buffer := bytes2.NewBuffer(tkn.scanStringBuf)
 	closeFunc := func() {
-		bytes := buffer.Bytes()
-		unused := bytes[len(bytes):]
+		tkn.scanStringBuf = tkn.scanStringBuf[len(tkn.scanStringBuf):]
 
-		if cap(unused) < minBufferSize {
-			unused = make([]byte, defaultBufSize)[:0]
+		if cap(tkn.scanStringBuf) < minBufferSize {
+			tkn.scanStringBuf = make([]byte, defaultBufSize)[:0]
 		}
-
-		bufferPool.Put(unused)
 	}
 
 	return buffer, closeFunc
 }
 
 func (tkn *Tokenizer) scanString(delim uint16, typ int) (int, []byte) {
-	buffer, closeFunc := getBuffer()
+	buffer, closeFunc := tkn.getScanStringBuf()
 	defer closeFunc()
 
 	for {
