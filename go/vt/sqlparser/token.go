@@ -832,13 +832,27 @@ exit:
 	return token, buffer.Bytes()
 }
 
-func (tkn *Tokenizer) scanString(delim uint16, typ int) (int, []byte) {
+func getBuffer() (*bytes2.Buffer, func()) {
+	const minBufferSize = 128
+
 	buffer := bytes2.NewBuffer(bufferPool.Get().([]byte))
-	defer func() {
+	closeFunc := func() {
 		bytes := buffer.Bytes()
 		unused := bytes[len(bytes):]
+
+		if cap(unused) < minBufferSize {
+			unused = make([]byte, defaultBufSize)[:0]
+		}
+
 		bufferPool.Put(unused)
-	}()
+	}
+
+	return buffer, closeFunc
+}
+
+func (tkn *Tokenizer) scanString(delim uint16, typ int) (int, []byte) {
+	buffer, closeFunc := getBuffer()
+	defer closeFunc()
 
 	for {
 		ch := tkn.lastChar
