@@ -35,7 +35,8 @@ const (
 
 var bufferPool = &sync.Pool{
 	New: func() interface{} {
-		return make([]byte, defaultBufSize)
+		bytes := make([]byte, defaultBufSize)
+		return bytes[:0]
 	},
 }
 
@@ -832,8 +833,12 @@ exit:
 }
 
 func (tkn *Tokenizer) scanString(delim uint16, typ int) (int, []byte) {
-	buffer := bytes2.NewBuffer(bufferPool.Get().([]byte)[:0])
-	defer bufferPool.Put(buffer.Bytes())
+	buffer := bytes2.NewBuffer(bufferPool.Get().([]byte))
+	defer func() {
+		bytes := buffer.Bytes()
+		unused := bytes[len(bytes):]
+		bufferPool.Put(unused)
+	}()
 
 	for {
 		ch := tkn.lastChar
