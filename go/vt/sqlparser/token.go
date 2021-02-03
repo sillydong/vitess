@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/dolthub/vitess/go/bytes2"
 	"github.com/dolthub/vitess/go/sqltypes"
@@ -27,9 +28,16 @@ import (
 )
 
 const (
-	defaultBufSize = 4096
+	defaultTokenizerBufSize = 4*1024
+	defaultBufSize = 4*1024
 	eofChar        = 0x100
 )
+
+var bufferPool = &sync.Pool{
+	New: func() interface{} {
+		return make([]byte, defaultBufSize)
+	},
+}
 
 // Tokenizer is the struct used to generate SQL
 // tokens for the parser.
@@ -70,7 +78,7 @@ func NewStringTokenizer(sql string) *Tokenizer {
 func NewTokenizer(r io.Reader) *Tokenizer {
 	return &Tokenizer{
 		InStream: r,
-		buf:      make([]byte, defaultBufSize),
+		buf:      make([]byte, defaultTokenizerBufSize),
 	}
 }
 
@@ -824,7 +832,9 @@ exit:
 }
 
 func (tkn *Tokenizer) scanString(delim uint16, typ int) (int, []byte) {
-	var buffer bytes2.Buffer
+	buffer := bytes2.NewBuffer(bufferPool.Get().([]byte)[:0])
+	defer bufferPool.Put(buffer.Bytes())
+
 	for {
 		ch := tkn.lastChar
 		if ch == eofChar {
