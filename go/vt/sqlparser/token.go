@@ -834,11 +834,14 @@ func (tkn *Tokenizer)getScanStringBuf() (*bytes2.Buffer, func()) {
 
 	buffer := bytes2.NewBuffer(tkn.scanStringBuf)
 	closeFunc := func() {
-		tkn.scanStringBuf = tkn.scanStringBuf[len(tkn.scanStringBuf):]
+		bytes := buffer.Bytes()
+		unused := bytes[len(bytes):]
 
-		if cap(tkn.scanStringBuf) < minBufferSize {
-			tkn.scanStringBuf = make([]byte, defaultBufSize)[:0]
+		if cap(unused) < minBufferSize {
+			unused = make([]byte, defaultBufSize)[:0]
 		}
+
+		tkn.scanStringBuf = unused
 	}
 
 	return buffer, closeFunc
