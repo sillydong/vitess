@@ -2974,11 +2974,7 @@ func TestCreateTable(t *testing.T) {
 
 func TestLoadData(t *testing.T) {
 	validSQL := []string{
-		"load data from s3 'x.txt'",
-		"load data from s3 manifest 'x.txt'",
-		"load data from s3 file 'x.txt'",
-		"load data infile 'x.txt' into table 'c'",
-		"load data from s3 'x.txt' into table x"}
+		"load data infile 'x.txt' into table 'c'"}
 	for _, tcase := range validSQL {
 		_, err := Parse(tcase)
 		require.NoError(t, err)
