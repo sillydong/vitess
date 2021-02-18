@@ -2972,6 +2972,19 @@ func TestCreateTable(t *testing.T) {
 	}
 }
 
+func TestLoadData(t *testing.T) {
+	validSQL := []string{
+		"load data from s3 'x.txt'",
+		"load data from s3 manifest 'x.txt'",
+		"load data from s3 file 'x.txt'",
+		"load data infile 'x.txt' into table 'c'",
+		"load data from s3 'x.txt' into table x"}
+	for _, tcase := range validSQL {
+		_, err := Parse(tcase)
+		require.NoError(t, err)
+	}
+}
+
 func TestCreateTableLike(t *testing.T) {
 	normal := "create table a like b"
 	testCases := []struct {

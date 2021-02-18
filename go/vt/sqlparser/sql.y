@@ -139,6 +139,7 @@ func skipToEnd(yylex interface{}) {
 %left <bytes> UNION
 %token <bytes> SELECT STREAM INSERT UPDATE DELETE FROM WHERE GROUP HAVING ORDER BY LIMIT OFFSET FOR CALL
 %token <bytes> ALL DISTINCT AS EXISTS ASC DESC INTO DUPLICATE DEFAULT SET LOCK UNLOCK KEYS OF
+%token <bytes> OUTFILE DATA LOAD LINES TERMINATED ESCAPED ENCLOSED
 %right <bytes> UNIQUE KEY
 %token <bytes> SYSTEM_TIME
 %token <bytes> VALUES LAST_INSERT_ID
@@ -187,7 +188,7 @@ func skipToEnd(yylex interface{}) {
 %token <bytes> STATUS VARIABLES WARNINGS
 %token <bytes> SEQUENCE
 %token <bytes> EACH ROW BEFORE FOLLOWS PRECEDES DEFINER INVOKER
-%token <bytes> INOUT OUT DETERMINISTIC CONTAINS READS MODIFIES SQL DATA SECURITY
+%token <bytes> INOUT OUT DETERMINISTIC CONTAINS READS MODIFIES SQL SECURITY
 
 // SIGNAL Tokens
 %token <bytes> CLASS_ORIGIN SUBCLASS_ORIGIN MESSAGE_TEXT MYSQL_ERRNO CONSTRAINT_CATALOG CONSTRAINT_SCHEMA
@@ -260,7 +261,7 @@ func skipToEnd(yylex interface{}) {
 %type <ddl> create_table_prefix rename_list
 %type <statement> analyze_statement show_statement use_statement other_statement
 %type <statement> describe_statement explain_statement explainable_statement
-%type <statement> begin_statement commit_statement rollback_statement start_transaction_statement
+%type <statement> begin_statement commit_statement rollback_statement start_transaction_statement load_statement
 %type <bytes2> comment_opt comment_list
 %type <str> union_op insert_or_replace
 %type <str> distinct_opt straight_join_opt cache_opt match_option separator_opt format_opt
@@ -412,10 +413,17 @@ command:
 | flush_statement
 | signal_statement
 | call_statement
+| load_statement
 | /*empty*/
 {
   setParseTree(yylex, nil)
 }
+
+load_statement:
+  LOAD DATA skip_to_end
+  {
+    $$ = &Load{}
+  }
 
 select_statement:
   base_select order_by_opt limit_opt lock_opt
@@ -4462,6 +4470,7 @@ non_reserved_keyword:
 | LESS
 | LEVEL
 | LINESTRING
+| LOAD
 | LOCKED
 | LONGBLOB
 | LONGTEXT

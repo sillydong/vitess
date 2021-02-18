@@ -10,7 +10,7 @@ You may obtain a copy of the License at
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
+See the License for the specific language governing permisions and
 limitations under the License.
 */
 
@@ -306,6 +306,7 @@ func (*CaseStatement) iStatement() {}
 func (*IfStatement) iStatement()   {}
 func (*Signal) iStatement()        {}
 func (*Call) iStatement()          {}
+func (*Load) iStatement()          {}
 
 // ParenSelect can actually not be a top level statement,
 // but we have to allow it because it's a requirement
@@ -512,6 +513,32 @@ func (node *Union) walkSubtree(visit Visit) error {
 		node.Right,
 	)
 }
+
+//// LoadStatement any LOAD statement.
+//type LoadStatement interface {
+//	iLoadStatement()
+//	iStatement()
+//	SQLNode
+//}
+
+// Load represents a LOAD statement
+type Load struct {
+}
+
+func (l *Load) Format(buf *TrackedBuffer) {
+	buf.WriteString("AST node missing for Load type")
+}
+
+func (node *Load) walkSubtree(visit Visit) error {
+	if node == nil {
+		return nil
+	}
+	return Walk(
+		visit,
+		nil,
+	)
+}
+
 
 // BeginEndBlock represents a BEGIN .. END block with one or more statements nested within
 type BeginEndBlock struct {
