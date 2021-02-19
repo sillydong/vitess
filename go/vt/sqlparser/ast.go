@@ -514,19 +514,53 @@ func (node *Union) walkSubtree(visit Visit) error {
 	)
 }
 
-//// LoadStatement any LOAD statement.
-//type LoadStatement interface {
-//	iLoadStatement()
+//// SelectStatement any SELECT statement.
+//type SelectStatement interface {
+//	iSelectStatement()
 //	iStatement()
+//	iInsertRows()
+//	AddOrder(*Order)
+//	SetLimit(*Limit)
 //	SQLNode
 //}
+//
+//func (*Select) iSelectStatement()      {}
+//func (*Union) iSelectStatement()       {}
+//func (*ParenSelect) iSelectStatement() {}
+//
+//// Select represents a SELECT statement.
+//type Select struct {
+//	Cache       string
+//	Comments    Comments
+//	Distinct    string
+//	Hints       string
+//	SelectExprs SelectExprs
+//	From        TableExprs
+//	Where       *Where
+//	GroupBy     GroupBy
+//	Having      *Where
+//	OrderBy     OrderBy
+//	Limit       *Limit
+//	Lock        string
+//}
+
+// LoadStatement any LOAD statement.
+type LoadStatement interface {
+	iLoadStatement()
+	iStatement()
+	SQLNode
+}
 
 // Load represents a LOAD statement
 type Load struct {
+	Infile string
+	Table TableName
 }
 
-func (l *Load) Format(buf *TrackedBuffer) {
-	buf.WriteString("AST node missing for Load type")
+func (*Load) iLoadStatement()      {}
+
+func (node *Load) Format(buf *TrackedBuffer) {
+	buf.Myprintf("LOAD DATA INFILE '%s' INTO TABLE %s", node.Infile, node.Table.String())
 }
 
 func (node *Load) walkSubtree(visit Visit) error {
@@ -538,7 +572,6 @@ func (node *Load) walkSubtree(visit Visit) error {
 		nil,
 	)
 }
-
 
 // BeginEndBlock represents a BEGIN .. END block with one or more statements nested within
 type BeginEndBlock struct {

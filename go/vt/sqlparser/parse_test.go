@@ -2973,11 +2973,32 @@ func TestCreateTable(t *testing.T) {
 }
 
 func TestLoadData(t *testing.T) {
+	// "load data infile 'x.txt' into table 'c'"
 	validSQL := []string{
-		"load data infile 'x.txt' into table 'c'"}
+		"load data infile 'x.txt' INTO TABLE c"}
 	for _, tcase := range validSQL {
-		_, err := Parse(tcase)
+		p, err := Parse(tcase)
+		fmt.Println(String(p))
 		require.NoError(t, err)
+	}
+
+	testCases := []struct {
+		input  string
+		output string
+	}{{
+		// test with simple file
+		input: "LOAD DATA INFILE 'x.txt' INTO TABLE c",
+		output: "LOAD DATA INFILE 'x.txt' INTO TABLE c",
+	},{
+		input: "LOAD DATA INFILE '~/Desktop/x.txt' INTO TABLE c",
+		output: "LOAD DATA INFILE '~/Desktop/x.txt' INTO TABLE c",
+	}}
+	for _, tcase := range testCases {
+		p, err := Parse(tcase.input)
+		require.NoError(t, err)
+		if got, want := String(p), tcase.output; got != want {
+			t.Errorf("Parse(%s):\n%s, want\n%s", tcase.input, got, want)
+		}
 	}
 }
 

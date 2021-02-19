@@ -231,7 +231,7 @@ var keywords = map[string]int{
 	"in":                  IN,
 	"index":               INDEX,
 	"indexes":             INDEXES,
-	"infile":              UNUSED,
+	"infile":              INFILE,
 	"inner":               INNER,
 	"inout":               INOUT,
 	"insensitive":         UNUSED,

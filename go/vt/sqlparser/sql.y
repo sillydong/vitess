@@ -240,7 +240,7 @@ func skipToEnd(yylex interface{}) {
 %token <bytes> INACTIVE INVISIBLE LOCKED MASTER_COMPRESSION_ALGORITHMS MASTER_PUBLIC_KEY_PATH MASTER_TLS_CIPHERSUITES MASTER_ZSTD_COMPRESSION_LEVEL
 %token <bytes> NESTED NETWORK_NAMESPACE NOWAIT NULLS OJ OLD OPTIONAL ORDINALITY ORGANIZATION OTHERS PATH PERSIST PERSIST_ONLY PRECEDING PRIVILEGE_CHECKS_USER PROCESS
 %token <bytes> RANDOM REFERENCE REQUIRE_ROW_FORMAT RESOURCE RESPECT RESTART RETAIN REUSE ROLE SECONDARY SECONDARY_ENGINE SECONDARY_LOAD SECONDARY_UNLOAD SKIP SRID
-%token <bytes> THREAD_PRIORITY TIES UNBOUNDED VCPU VISIBLE SYSTEM
+%token <bytes> THREAD_PRIORITY TIES UNBOUNDED VCPU VISIBLE SYSTEM INFILE
 
 %type <statement> command
 %type <selStmt> select_statement base_select union_lhs union_rhs
@@ -365,7 +365,7 @@ func skipToEnd(yylex interface{}) {
 %type <colIdent> vindex_type vindex_type_opt
 %type <bytes> ignored_alter_object_type
 %type <ReferenceAction> fk_reference_action fk_on_delete fk_on_update
-%type <str> constraint_symbol_opt
+%type <str> constraint_symbol_opt infile_opt
 %type <exprs> call_param_list_opt
 %type <procedureParams> proc_param_list_opt proc_param_list
 %type <procedureParam> proc_param
@@ -420,9 +420,9 @@ command:
 }
 
 load_statement:
-  LOAD DATA skip_to_end
+  LOAD DATA infile_opt into_table_name
   {
-    $$ = &Load{}
+    $$ = &Load{Infile: $3, Table: $4}
   }
 
 select_statement:
@@ -2978,7 +2978,11 @@ natural_join:
   }
 
 into_table_name:
-  INTO table_name
+  INTO TABLE table_name
+  {
+    $$ = $3
+  }
+| INTO table_name
   {
     $$ = $2
   }
@@ -4245,6 +4249,11 @@ reserved_table_id:
   {
     $$ = NewTableIdent(string($1))
   }
+
+infile_opt:
+  { $$ = string("") }
+| INFILE STRING
+  { $$ = string($2)}
 
 /*
   These are not all necessarily reserved in MySQL, but some are.
