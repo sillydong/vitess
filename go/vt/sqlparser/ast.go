@@ -556,6 +556,10 @@ type Load struct {
 	Local BoolVal
 	Infile string
 	Table TableName
+	Partition Partitions
+	Charset string
+	Fields string
+	Lines string
 }
 
 func (*Load) iLoadStatement()      {}
@@ -563,9 +567,15 @@ func (*Load) iLoadStatement()      {}
 func (node *Load) Format(buf *TrackedBuffer) {
 	local := ""
 	if node.Local {
-		local = "LOCAL "
+		local = "local "
 	}
-	buf.Myprintf("LOAD DATA %sINFILE '%s' INTO TABLE %s", local, node.Infile, node.Table.String())
+	charset := ""
+	if node.Charset != "" {
+		charset = " character set " + node.Charset
+	}
+
+	buf.Myprintf("load data %sinfile '%s' into table %s%v%s%s%s", local, node.Infile, node.Table.String(),
+		node.Partition, charset, node.Fields, node.Lines)
 }
 
 func (node *Load) walkSubtree(visit Visit) error {

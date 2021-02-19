@@ -2988,13 +2988,25 @@ func TestLoadData(t *testing.T) {
 	}{{
 		// test with simple file
 		input: "LOAD DATA INFILE 'x.txt' INTO TABLE c",
-		output: "LOAD DATA INFILE 'x.txt' INTO TABLE c",
+		output: "load data infile 'x.txt' into table c",
 	},{
 		input: "LOAD DATA INFILE '~/Desktop/x.txt' INTO TABLE c",
-		output: "LOAD DATA INFILE '~/Desktop/x.txt' INTO TABLE c",
+		output: "load data infile '~/Desktop/x.txt' into table c",
 	},{
 		input: "LOAD DATA LOCAL INFILE ':SOURCE:9fa1415b62a44b53b86cffbccb210b51' INTO TABLE test",
-		output: "LOAD DATA LOCAL INFILE ':SOURCE:9fa1415b62a44b53b86cffbccb210b51' INTO TABLE test",
+		output: "load data local infile ':SOURCE:9fa1415b62a44b53b86cffbccb210b51' into table test",
+	},{
+		input: "LOAD DATA LOCAL INFILE ':SOURCE:9fa1415b62a44b53b86cffbccb210b51' INTO TABLE test PARTITION (id)",
+		output: "load data local infile ':SOURCE:9fa1415b62a44b53b86cffbccb210b51' into table test partition (id)",
+	},{
+		input: "LOAD DATA LOCAL INFILE ':SOURCE:9fa1415b62a44b53b86cffbccb210b51' INTO TABLE test PARTITION (id) CHARACTER SET UTF8MB4",
+		output: "load data local infile ':SOURCE:9fa1415b62a44b53b86cffbccb210b51' into table test partition (id) character set UTF8MB4",
+	},{
+		input: "LOAD DATA LOCAL INFILE ':SOURCE:9fa1415b62a44b53b86cffbccb210b51' INTO TABLE test PARTITION (id) CHARACTER SET UTF8MB4 FIELDS TERMINATED BY '' ESCAPED BY ''",
+		output: "load data local infile ':SOURCE:9fa1415b62a44b53b86cffbccb210b51' into table test partition (id) character set UTF8MB4 fields terminated by '' escaped by ''",
+	},{
+		input: "LOAD DATA LOCAL INFILE ':SOURCE:9fa1415b62a44b53b86cffbccb210b51' INTO TABLE test PARTITION (id) CHARACTER SET UTF8MB4 FIELDS TERMINATED BY '' ESCAPED BY '' LINES TERMINATED BY ''",
+		output: "load data local infile ':SOURCE:9fa1415b62a44b53b86cffbccb210b51' into table test partition (id) character set UTF8MB4 fields terminated by '' escaped by '' lines terminated by ''",
 	}}
 	for _, tcase := range testCases {
 		p, err := Parse(tcase.input)

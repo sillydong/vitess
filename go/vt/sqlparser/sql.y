@@ -139,7 +139,7 @@ func skipToEnd(yylex interface{}) {
 %left <bytes> UNION
 %token <bytes> SELECT STREAM INSERT UPDATE DELETE FROM WHERE GROUP HAVING ORDER BY LIMIT OFFSET FOR CALL
 %token <bytes> ALL DISTINCT AS EXISTS ASC DESC INTO DUPLICATE DEFAULT SET LOCK UNLOCK KEYS OF
-%token <bytes> OUTFILE DATA LOAD LINES TERMINATED ESCAPED ENCLOSED
+%token <bytes> OUTFILE DATA LOAD LINES TERMINATED ESCAPED ENCLOSED OPTIONALLY STARTING
 %right <bytes> UNIQUE KEY
 %token <bytes> SYSTEM_TIME
 %token <bytes> VALUES LAST_INSERT_ID
@@ -264,7 +264,7 @@ func skipToEnd(yylex interface{}) {
 %type <statement> begin_statement commit_statement rollback_statement start_transaction_statement load_statement
 %type <bytes2> comment_opt comment_list
 %type <str> union_op insert_or_replace
-%type <str> distinct_opt straight_join_opt cache_opt match_option separator_opt format_opt
+%type <str> distinct_opt straight_join_opt cache_opt match_option separator_opt format_opt optionally_opt
 %type <expr> like_escape_opt
 %type <selectExprs> select_expression_list select_expression_list_opt
 %type <selectExpr> select_expression
@@ -365,7 +365,7 @@ func skipToEnd(yylex interface{}) {
 %type <colIdent> vindex_type vindex_type_opt
 %type <bytes> ignored_alter_object_type
 %type <ReferenceAction> fk_reference_action fk_on_delete fk_on_update
-%type <str> constraint_symbol_opt infile_opt
+%type <str> constraint_symbol_opt infile_opt fields_opt lines_opt starting_by_opt terminated_by_opt enclosed_by_opt escaped_by_opt
 %type <exprs> call_param_list_opt
 %type <procedureParams> proc_param_list_opt proc_param_list
 %type <procedureParam> proc_param
@@ -420,9 +420,9 @@ command:
 }
 
 load_statement:
-  LOAD DATA local_opt infile_opt into_table_name
+  LOAD DATA local_opt infile_opt into_table_name opt_partition_clause charset_opt fields_opt lines_opt
   {
-    $$ = &Load{Local: $3, Infile: $4, Table: $5}
+    $$ = &Load{Local: $3, Infile: $4, Table: $5, Partition: $6, Charset: $7, Fields: $8, Lines: $9}
   }
 
 select_statement:
@@ -4260,6 +4260,69 @@ local_opt:
 | LOCAL
   { $$ = BoolVal(true) }
 
+enclosed_by_opt:
+  {
+    $$ = ""
+  }
+| optionally_opt ENCLOSED BY STRING
+  {
+    $$ = $1 + " enclosed by '" + string($4) + "'"
+  }
+
+optionally_opt:
+  {
+    $$ = ""
+  }
+| OPTIONALLY
+  {
+    $$ = " optionally"
+  }
+
+terminated_by_opt:
+  {
+    $$ = ""
+  }
+| TERMINATED BY STRING
+  {
+    $$ = " terminated by '" + string($3)  + "'"
+  }
+
+escaped_by_opt:
+  {
+    $$ = ""
+  }
+| ESCAPED BY STRING
+  {
+    $$ = " escaped by '" + string($3) + "'"
+  }
+
+fields_opt:
+  {
+    $$ = ""
+  }
+| columns_or_fields terminated_by_opt enclosed_by_opt escaped_by_opt
+  {
+    $$ = " fields" + $2 + $3 + $4
+  }
+
+lines_opt:
+  {
+    $$ = ""
+  }
+| LINES starting_by_opt terminated_by_opt
+  {
+    $$ = " lines" + $2 + $3
+  }
+
+starting_by_opt:
+  {
+    $$ = ""
+  }
+| STARTING BY STRING
+  {
+    $$ = " starting by '" + string($3) + "'"
+  }
+
 /*
   These are not all necessarily reserved in MySQL, but some are.
 
@@ -4484,6 +4547,7 @@ non_reserved_keyword:
 | LAST_INSERT_ID
 | LESS
 | LEVEL
+| LINES
 | LINESTRING
 | LOAD
 | LOCKED
@@ -4516,6 +4580,7 @@ non_reserved_keyword:
 | ONLY
 | OPTIMIZE
 | OPTIONAL
+| OPTIONALLY
 | ORDINALITY
 | ORGANIZATION
 | OTHERS
@@ -4567,6 +4632,7 @@ non_reserved_keyword:
 | SQLSTATE
 | SRID
 | START
+| STARTING
 | STATUS
 | SUBCLASS_ORIGIN
 | TABLES
