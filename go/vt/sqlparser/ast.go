@@ -553,6 +553,7 @@ type LoadStatement interface {
 
 // Load represents a LOAD statement
 type Load struct {
+	Local BoolVal
 	Infile string
 	Table TableName
 }
@@ -560,7 +561,11 @@ type Load struct {
 func (*Load) iLoadStatement()      {}
 
 func (node *Load) Format(buf *TrackedBuffer) {
-	buf.Myprintf("LOAD DATA INFILE '%s' INTO TABLE %s", node.Infile, node.Table.String())
+	local := ""
+	if node.Local {
+		local = "LOCAL "
+	}
+	buf.Myprintf("LOAD DATA %sINFILE '%s' INTO TABLE %s", local, node.Infile, node.Table.String())
 }
 
 func (node *Load) walkSubtree(visit Visit) error {

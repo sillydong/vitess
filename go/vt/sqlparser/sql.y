@@ -207,7 +207,7 @@ func skipToEnd(yylex interface{}) {
 %token <bytes> GEOMETRY POINT LINESTRING POLYGON GEOMETRYCOLLECTION MULTIPOINT MULTILINESTRING MULTIPOLYGON
 
 // Type Modifiers
-%token <bytes> NULLX AUTO_INCREMENT APPROXNUM SIGNED UNSIGNED ZEROFILL
+%token <bytes> NULLX AUTO_INCREMENT APPROXNUM SIGNED UNSIGNED ZEROFILL LOCAL
 
 // Supported SHOW tokens
 %token <bytes> COLLATION DATABASES SCHEMAS TABLES VITESS_METADATA VSCHEMA FULL PROCESSLIST COLUMNS FIELDS ENGINES PLUGINS
@@ -338,7 +338,7 @@ func skipToEnd(yylex interface{}) {
 %type <str> charset_opt collate_opt
 %type <boolVal> unsigned_opt zero_fill_opt
 %type <LengthScaleOption> float_length_opt decimal_length_opt
-%type <boolVal> null_or_not_null auto_increment
+%type <boolVal> null_or_not_null auto_increment local_opt
 %type <colKeyOpt> column_key
 %type <strs> enum_values
 %type <columnDefinition> column_definition
@@ -420,9 +420,9 @@ command:
 }
 
 load_statement:
-  LOAD DATA infile_opt into_table_name
+  LOAD DATA local_opt infile_opt into_table_name
   {
-    $$ = &Load{Infile: $3, Table: $4}
+    $$ = &Load{Local: $3, Infile: $4, Table: $5}
   }
 
 select_statement:
@@ -4255,6 +4255,11 @@ infile_opt:
 | INFILE STRING
   { $$ = string($2)}
 
+local_opt:
+  { $$ = BoolVal(false) }
+| LOCAL
+  { $$ = BoolVal(true) }
+
 /*
   These are not all necessarily reserved in MySQL, but some are.
 
@@ -4333,6 +4338,7 @@ reserved_keyword:
 | LEFT
 | LIKE
 | LIMIT
+| LOCAL
 | LOCALTIME
 | LOCALTIMESTAMP
 | LOCK

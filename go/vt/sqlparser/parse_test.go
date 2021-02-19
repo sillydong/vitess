@@ -2992,6 +2992,9 @@ func TestLoadData(t *testing.T) {
 	},{
 		input: "LOAD DATA INFILE '~/Desktop/x.txt' INTO TABLE c",
 		output: "LOAD DATA INFILE '~/Desktop/x.txt' INTO TABLE c",
+	},{
+		input: "LOAD DATA LOCAL INFILE ':SOURCE:9fa1415b62a44b53b86cffbccb210b51' INTO TABLE test",
+		output: "LOAD DATA LOCAL INFILE ':SOURCE:9fa1415b62a44b53b86cffbccb210b51' INTO TABLE test",
 	}}
 	for _, tcase := range testCases {
 		p, err := Parse(tcase.input)
