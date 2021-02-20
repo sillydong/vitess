@@ -560,6 +560,8 @@ type Load struct {
 	Charset string
 	Fields string
 	Lines string
+	IgnoreNum *SQLVal
+	Columns
 }
 
 func (*Load) iLoadStatement()      {}
@@ -574,8 +576,13 @@ func (node *Load) Format(buf *TrackedBuffer) {
 		charset = " character set " + node.Charset
 	}
 
-	buf.Myprintf("load data %sinfile '%s' into table %s%v%s%s%s", local, node.Infile, node.Table.String(),
-		node.Partition, charset, node.Fields, node.Lines)
+	ignore := ""
+	if node.IgnoreNum != nil {
+		ignore = fmt.Sprintf(" ignore %v lines ", node.IgnoreNum)
+	}
+
+	buf.Myprintf("load data %sinfile '%s' into table %s%v%s%s%s%s%v", local, node.Infile, node.Table.String(),
+		node.Partition, charset, node.Fields, node.Lines, ignore, node.Columns)
 }
 
 func (node *Load) walkSubtree(visit Visit) error {

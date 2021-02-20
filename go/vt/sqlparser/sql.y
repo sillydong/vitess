@@ -307,7 +307,7 @@ func skipToEnd(yylex interface{}) {
 %type <str> asc_desc_opt
 %type <limit> limit_opt
 %type <str> lock_opt
-%type <columns> ins_column_list column_list
+%type <columns> ins_column_list column_list column_list_opt
 %type <partitions> opt_partition_clause partition_list
 %type <setExprs> on_dup_opt
 %type <setExprs> set_list transaction_chars
@@ -333,7 +333,7 @@ func skipToEnd(yylex interface{}) {
 %type <convertType> convert_type
 %type <columnType> column_type  column_type_options
 %type <columnType> int_type decimal_type numeric_type time_type char_type spatial_type
-%type <sqlVal> length_opt column_comment
+%type <sqlVal> length_opt column_comment ignore_number_opt
 %type <optVal> column_default on_update
 %type <str> charset_opt collate_opt
 %type <boolVal> unsigned_opt zero_fill_opt
@@ -420,9 +420,9 @@ command:
 }
 
 load_statement:
-  LOAD DATA local_opt infile_opt into_table_name opt_partition_clause charset_opt fields_opt lines_opt
+  LOAD DATA local_opt infile_opt into_table_name opt_partition_clause charset_opt fields_opt lines_opt ignore_number_opt column_list_opt
   {
-    $$ = &Load{Local: $3, Infile: $4, Table: $5, Partition: $6, Charset: $7, Fields: $8, Lines: $9}
+    $$ = &Load{Local: $3, Infile: $4, Table: $5, Partition: $6, Charset: $7, Fields: $8, Lines: $9, IgnoreNum: $10, Columns: $11}
   }
 
 select_statement:
@@ -2846,6 +2846,15 @@ as_of_opt:
     $$ = $3
   }
 
+column_list_opt:
+  {
+    $$ = nil
+  }
+| '(' column_list ')'
+  {
+    $$ = $2
+  }
+
 column_list:
   sql_id
   {
@@ -4164,6 +4173,11 @@ ignore_opt:
   { $$ = "" }
 | IGNORE
   { $$ = IgnoreStr }
+
+ignore_number_opt:
+  { $$ = nil }
+| IGNORE INTEGRAL LINES
+  { $$ = NewIntVal($2) }
 
 non_add_drop_or_rename_operation:
   ALTER
