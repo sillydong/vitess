@@ -514,36 +514,6 @@ func (node *Union) walkSubtree(visit Visit) error {
 	)
 }
 
-//// SelectStatement any SELECT statement.
-//type SelectStatement interface {
-//	iSelectStatement()
-//	iStatement()
-//	iInsertRows()
-//	AddOrder(*Order)
-//	SetLimit(*Limit)
-//	SQLNode
-//}
-//
-//func (*Select) iSelectStatement()      {}
-//func (*Union) iSelectStatement()       {}
-//func (*ParenSelect) iSelectStatement() {}
-//
-//// Select represents a SELECT statement.
-//type Select struct {
-//	Cache       string
-//	Comments    Comments
-//	Distinct    string
-//	Hints       string
-//	SelectExprs SelectExprs
-//	From        TableExprs
-//	Where       *Where
-//	GroupBy     GroupBy
-//	Having      *Where
-//	OrderBy     OrderBy
-//	Limit       *Limit
-//	Lock        string
-//}
-
 // LoadStatement any LOAD statement.
 type LoadStatement interface {
 	iLoadStatement()
@@ -591,7 +561,13 @@ func (node *Load) walkSubtree(visit Visit) error {
 	}
 	return Walk(
 		visit,
-		nil,
+		node.Local,
+		node.Table,
+		node.Partition,
+		node.Fields,
+		node.Lines,
+		node.IgnoreNum,
+		node.Columns,
 	)
 }
 
