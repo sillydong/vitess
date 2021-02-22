@@ -182,7 +182,7 @@ var keywords = map[string]int{
 	"each":                EACH,
 	"else":                ELSE,
 	"elseif":              ELSEIF,
-	"enclosed":            UNUSED,
+	"enclosed":            ENCLOSED,
 	"end":                 END,
 	"engines":             ENGINES,
 	"enum":                ENUM,

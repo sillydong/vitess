@@ -10,7 +10,7 @@ You may obtain a copy of the License at
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permisions and
+See the License for the specific language governing permissions and
 limitations under the License.
 */
 
@@ -558,7 +558,7 @@ type Load struct {
 	Table TableName
 	Partition Partitions
 	Charset string
-	Fields string
+	*Fields
 	Lines string
 	IgnoreNum *SQLVal
 	Columns
@@ -581,7 +581,7 @@ func (node *Load) Format(buf *TrackedBuffer) {
 		ignore = fmt.Sprintf(" ignore %v lines ", node.IgnoreNum)
 	}
 
-	buf.Myprintf("load data %sinfile '%s' into table %s%v%s%s%s%s%v", local, node.Infile, node.Table.String(),
+	buf.Myprintf("load data %sinfile '%s' into table %s%v%s%v%s%s%v", local, node.Infile, node.Table.String(),
 		node.Partition, charset, node.Fields, node.Lines, ignore, node.Columns)
 }
 
@@ -592,6 +592,50 @@ func (node *Load) walkSubtree(visit Visit) error {
 	return Walk(
 		visit,
 		nil,
+	)
+}
+
+type Fields struct {
+	TerminatedBy string
+	EnclosedBy   string
+	EscapedBy    string
+	SQLNode
+}
+
+func (node *Fields) Format(buf *TrackedBuffer) {
+	if node == nil {
+		return
+	}
+
+	terminated := ""
+	if node.TerminatedBy != "" {
+		terminated = "terminated by " + node.TerminatedBy
+	}
+
+	enclosed := ""
+	if node.EnclosedBy != "" {
+		enclosed = " enclosed by " + node.EnclosedBy
+	}
+
+	escaped := ""
+	if node.EscapedBy != "" {
+		escaped = " escaped by " + node.EscapedBy
+	}
+
+	buf.Myprintf(" fields %s%s%s", terminated, enclosed, escaped)
+}
+
+type Lines struct {
+	StartingBy string
+	TerminatedBy string
+}
+
+func (node *Fields) walkSubtree(visit Visit) error {
+	if node == nil {
+		return nil
+	}
+	return Walk(
+		visit,
 	)
 }
 

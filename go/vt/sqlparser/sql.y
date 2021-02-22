@@ -133,6 +133,7 @@ func skipToEnd(yylex interface{}) {
   procedureParams []ProcedureParam
   characteristic Characteristic
   characteristics []Characteristic
+  Fields    *Fields
 }
 
 %token LEX_ERROR
@@ -365,12 +366,13 @@ func skipToEnd(yylex interface{}) {
 %type <colIdent> vindex_type vindex_type_opt
 %type <bytes> ignored_alter_object_type
 %type <ReferenceAction> fk_reference_action fk_on_delete fk_on_update
-%type <str> constraint_symbol_opt infile_opt fields_opt lines_opt starting_by_opt terminated_by_opt enclosed_by_opt escaped_by_opt
+%type <str> constraint_symbol_opt infile_opt lines_opt starting_by_opt terminated_by_opt enclosed_by_opt escaped_by_opt
 %type <exprs> call_param_list_opt
 %type <procedureParams> proc_param_list_opt proc_param_list
 %type <procedureParam> proc_param
 %type <characteristics> characteristic_list_opt characteristic_list
 %type <characteristic> characteristic
+%type <Fields> fields_opt
 
 %start any_command
 
@@ -4280,7 +4282,7 @@ enclosed_by_opt:
   }
 | optionally_opt ENCLOSED BY STRING
   {
-    $$ = $1 + " enclosed by '" + string($4) + "'"
+    $$ = "'" + string($4) + "'"
   }
 
 optionally_opt:
@@ -4298,7 +4300,7 @@ terminated_by_opt:
   }
 | TERMINATED BY STRING
   {
-    $$ = " terminated by '" + string($3)  + "'"
+    $$ =  "'" + string($3) +  "'"
   }
 
 escaped_by_opt:
@@ -4307,16 +4309,16 @@ escaped_by_opt:
   }
 | ESCAPED BY STRING
   {
-    $$ = " escaped by '" + string($3) + "'"
+    $$ =  "'" + string($3) + "'"
   }
 
 fields_opt:
   {
-    $$ = ""
+    $$ = nil
   }
 | columns_or_fields terminated_by_opt enclosed_by_opt escaped_by_opt
   {
-    $$ = " fields" + $2 + $3 + $4
+    $$ = &Fields{TerminatedBy: $2, EnclosedBy: $3, EscapedBy: $4}
   }
 
 lines_opt:
