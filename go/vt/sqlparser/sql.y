@@ -134,7 +134,7 @@ func skipToEnd(yylex interface{}) {
   characteristic Characteristic
   characteristics []Characteristic
   Fields *Fields
-  Lines	 *Lines
+  Lines	*Lines
 }
 
 %token LEX_ERROR
