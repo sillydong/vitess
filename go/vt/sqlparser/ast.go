@@ -551,6 +551,11 @@ func (node *Load) Format(buf *TrackedBuffer) {
 		ignore = fmt.Sprintf(" ignore %v lines ", node.IgnoreNum)
 	}
 
+	// TODO: Is there a better way to do this?
+	if node.IgnoreNum == nil && node.Columns != nil {
+		ignore = " "
+	}
+
 	buf.Myprintf("load data %sinfile '%s' into table %s%v%s%v%v%s%v", local, node.Infile, node.Table.String(),
 		node.Partition, charset, node.Fields, node.Lines, ignore, node.Columns)
 }
