@@ -618,6 +618,7 @@ func (node *Fields) walkSubtree(visit Visit) error {
 type Lines struct {
 	StartingBy string
 	TerminatedBy string
+	SQLNode
 }
 
 func (node *Lines) Format(buf *TrackedBuffer) {
