@@ -559,7 +559,7 @@ type Load struct {
 	Partition Partitions
 	Charset string
 	*Fields
-	Lines string
+	*Lines
 	IgnoreNum *SQLVal
 	Columns
 }
@@ -581,7 +581,7 @@ func (node *Load) Format(buf *TrackedBuffer) {
 		ignore = fmt.Sprintf(" ignore %v lines ", node.IgnoreNum)
 	}
 
-	buf.Myprintf("load data %sinfile '%s' into table %s%v%s%v%s%s%v", local, node.Infile, node.Table.String(),
+	buf.Myprintf("load data %sinfile '%s' into table %s%v%s%v%v%s%v", local, node.Infile, node.Table.String(),
 		node.Partition, charset, node.Fields, node.Lines, ignore, node.Columns)
 }
 
@@ -625,12 +625,39 @@ func (node *Fields) Format(buf *TrackedBuffer) {
 	buf.Myprintf(" fields %s%s%s", terminated, enclosed, escaped)
 }
 
+func (node *Fields) walkSubtree(visit Visit) error {
+	if node == nil {
+		return nil
+	}
+	return Walk(
+		visit,
+	)
+}
+
 type Lines struct {
 	StartingBy string
 	TerminatedBy string
 }
 
-func (node *Fields) walkSubtree(visit Visit) error {
+func (node *Lines) Format(buf *TrackedBuffer) {
+	if node == nil {
+		return
+	}
+
+	starting := ""
+	if node.StartingBy != "" {
+		starting = " starting by " + node.StartingBy
+	}
+
+	terminated := ""
+	if node.TerminatedBy != "" {
+		terminated = " terminated by " + node.TerminatedBy
+	}
+
+	buf.Myprintf(" lines%s%s", starting, terminated)
+}
+
+func (node *Lines) walkSubtree(visit Visit) error {
 	if node == nil {
 		return nil
 	}

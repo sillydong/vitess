@@ -133,7 +133,8 @@ func skipToEnd(yylex interface{}) {
   procedureParams []ProcedureParam
   characteristic Characteristic
   characteristics []Characteristic
-  Fields    *Fields
+  Fields *Fields
+  Lines	 *Lines
 }
 
 %token LEX_ERROR
@@ -366,13 +367,14 @@ func skipToEnd(yylex interface{}) {
 %type <colIdent> vindex_type vindex_type_opt
 %type <bytes> ignored_alter_object_type
 %type <ReferenceAction> fk_reference_action fk_on_delete fk_on_update
-%type <str> constraint_symbol_opt infile_opt lines_opt starting_by_opt terminated_by_opt enclosed_by_opt escaped_by_opt
+%type <str> constraint_symbol_opt infile_opt starting_by_opt terminated_by_opt enclosed_by_opt escaped_by_opt
 %type <exprs> call_param_list_opt
 %type <procedureParams> proc_param_list_opt proc_param_list
 %type <procedureParam> proc_param
 %type <characteristics> characteristic_list_opt characteristic_list
 %type <characteristic> characteristic
 %type <Fields> fields_opt
+%type <Lines> lines_opt
 
 %start any_command
 
@@ -4323,11 +4325,11 @@ fields_opt:
 
 lines_opt:
   {
-    $$ = ""
+    $$ = nil
   }
 | LINES starting_by_opt terminated_by_opt
   {
-    $$ = " lines" + $2 + $3
+    $$ = &Lines{StartingBy: $2, TerminatedBy: $3}
   }
 
 starting_by_opt:
@@ -4336,7 +4338,7 @@ starting_by_opt:
   }
 | STARTING BY STRING
   {
-    $$ = " starting by '" + string($3) + "'"
+    $$ = "'" + string($3) + "'"
   }
 
 /*
