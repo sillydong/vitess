@@ -135,6 +135,7 @@ func skipToEnd(yylex interface{}) {
   characteristics []Characteristic
   Fields *Fields
   Lines	*Lines
+  EnclosedBy *EnclosedBy
 }
 
 %token LEX_ERROR
@@ -266,7 +267,7 @@ func skipToEnd(yylex interface{}) {
 %type <statement> begin_statement commit_statement rollback_statement start_transaction_statement load_statement
 %type <bytes2> comment_opt comment_list
 %type <str> union_op insert_or_replace
-%type <str> distinct_opt straight_join_opt cache_opt match_option separator_opt format_opt optionally_opt
+%type <str> distinct_opt straight_join_opt cache_opt match_option separator_opt format_opt
 %type <expr> like_escape_opt
 %type <selectExprs> select_expression_list select_expression_list_opt
 %type <selectExpr> select_expression
@@ -276,7 +277,7 @@ func skipToEnd(yylex interface{}) {
 %type <joinCondition> join_condition join_condition_opt on_expression_opt
 %type <tableNames> table_name_list delete_table_list view_name_list
 %type <str> inner_join outer_join straight_join natural_join
-%type <tableName> table_name into_table_name delete_table_name
+%type <tableName> table_name load_into_table_name into_table_name delete_table_name
 %type <aliasedTableName> aliased_table_name aliased_table_options
 %type <indexHints> index_hint_list
 %type <expr> where_expression_opt
@@ -340,7 +341,7 @@ func skipToEnd(yylex interface{}) {
 %type <str> charset_opt collate_opt
 %type <boolVal> unsigned_opt zero_fill_opt
 %type <LengthScaleOption> float_length_opt decimal_length_opt
-%type <boolVal> null_or_not_null auto_increment local_opt
+%type <boolVal> null_or_not_null auto_increment local_opt optionally_opt
 %type <colKeyOpt> column_key
 %type <strs> enum_values
 %type <columnDefinition> column_definition
@@ -367,7 +368,7 @@ func skipToEnd(yylex interface{}) {
 %type <colIdent> vindex_type vindex_type_opt
 %type <bytes> ignored_alter_object_type
 %type <ReferenceAction> fk_reference_action fk_on_delete fk_on_update
-%type <str> constraint_symbol_opt infile_opt starting_by_opt terminated_by_opt enclosed_by_opt escaped_by_opt
+%type <str> constraint_symbol_opt infile_opt starting_by_opt terminated_by_opt escaped_by_opt
 %type <exprs> call_param_list_opt
 %type <procedureParams> proc_param_list_opt proc_param_list
 %type <procedureParam> proc_param
@@ -375,6 +376,7 @@ func skipToEnd(yylex interface{}) {
 %type <characteristic> characteristic
 %type <Fields> fields_opt
 %type <Lines> lines_opt
+%type <EnclosedBy> enclosed_by_opt
 
 %start any_command
 
@@ -424,7 +426,7 @@ command:
 }
 
 load_statement:
-  LOAD DATA local_opt infile_opt into_table_name opt_partition_clause charset_opt fields_opt lines_opt ignore_number_opt column_list_opt
+  LOAD DATA local_opt infile_opt load_into_table_name opt_partition_clause charset_opt fields_opt lines_opt ignore_number_opt column_list_opt
   {
     $$ = &Load{Local: $3, Infile: $4, Table: $5, Partition: $6, Charset: $7, Fields: $8, Lines: $9, IgnoreNum: $10, Columns: $11}
   }
@@ -2990,12 +2992,14 @@ natural_join:
     }
   }
 
-into_table_name:
+load_into_table_name:
   INTO TABLE table_name
   {
     $$ = $3
   }
-| INTO table_name
+
+into_table_name:
+INTO table_name
   {
     $$ = $2
   }
@@ -4280,20 +4284,20 @@ local_opt:
 
 enclosed_by_opt:
   {
-    $$ = ""
+    $$ = nil
   }
 | optionally_opt ENCLOSED BY STRING
   {
-    $$ = "'" + string($4) + "'"
+    $$ = &EnclosedBy{Optionally: $1, Delim: "'" + string($4) + "'"}
   }
 
 optionally_opt:
   {
-    $$ = ""
+    $$ = BoolVal(false)
   }
 | OPTIONALLY
   {
-    $$ = " optionally"
+    $$ = BoolVal(true)
   }
 
 terminated_by_opt:
@@ -4419,7 +4423,6 @@ reserved_keyword:
 | LEFT
 | LIKE
 | LIMIT
-| LOCAL
 | LOCALTIME
 | LOCALTIMESTAMP
 | LOCK
@@ -4568,6 +4571,7 @@ non_reserved_keyword:
 | LINES
 | LINESTRING
 | LOAD
+| LOCAL
 | LOCKED
 | LONGBLOB
 | LONGTEXT

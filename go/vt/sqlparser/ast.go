@@ -580,7 +580,7 @@ func (node *Load) walkSubtree(visit Visit) error {
 
 type Fields struct {
 	TerminatedBy string
-	EnclosedBy   string
+	*EnclosedBy
 	EscapedBy    string
 	SQLNode
 }
@@ -595,26 +595,40 @@ func (node *Fields) Format(buf *TrackedBuffer) {
 		terminated = "terminated by " + node.TerminatedBy
 	}
 
-	enclosed := ""
-	if node.EnclosedBy != "" {
-		enclosed = " enclosed by " + node.EnclosedBy
-	}
-
 	escaped := ""
 	if node.EscapedBy != "" {
 		escaped = " escaped by " + node.EscapedBy
 	}
 
-	buf.Myprintf(" fields %s%s%s", terminated, enclosed, escaped)
+	buf.Myprintf(" fields %s%v%s", terminated, node.EnclosedBy, escaped)
 }
 
 func (node *Fields) walkSubtree(visit Visit) error {
 	if node == nil {
 		return nil
 	}
-	return Walk(
-		visit,
-	)
+	return nil
+}
+
+type EnclosedBy struct {
+	Optionally BoolVal
+	Delim string
+	SQLNode
+}
+
+func (node *EnclosedBy) Format(buf *TrackedBuffer) {
+	if node == nil {
+		return
+	}
+
+	enclosed := "enclosed by " + node.Delim
+	if node.Optionally {
+		enclosed = " optionally " + enclosed
+	} else {
+		enclosed = " " + enclosed
+	}
+
+	buf.Myprintf(enclosed)
 }
 
 type Lines struct {
@@ -645,9 +659,7 @@ func (node *Lines) walkSubtree(visit Visit) error {
 	if node == nil {
 		return nil
 	}
-	return Walk(
-		visit,
-	)
+	return nil
 }
 
 // BeginEndBlock represents a BEGIN .. END block with one or more statements nested within
