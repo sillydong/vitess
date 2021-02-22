@@ -3010,6 +3010,18 @@ func TestLoadData(t *testing.T) {
 	},{
 		input: "LOAD DATA LOCAL INFILE 'g.xlsx' INTO TABLE test PARTITION (id) CHARACTER SET UTF8MB4 FIELDS TERMINATED BY '' ESCAPED BY '' LINES TERMINATED BY '' (`id`)",
 		output: "load data local infile 'g.xlsx' into table test partition (id) character set UTF8MB4 fields terminated by '' escaped by '' lines terminated by '' (id)",
+	},{
+		input: "LOAD DATA INFILE '/tmp/jokes.txt' INTO TABLE jokes FIELDS TERMINATED BY '' LINES TERMINATED BY '\n%%\n' (joke)",
+		output: "load data infile '/tmp/jokes.txt' into table jokes fields terminated by '' lines terminated by '\n%%\n' (joke)",
+	},{
+		input: "LOAD DATA INFILE 'data.txt' INTO TABLE db2.my_table",
+		output: "load data infile 'data.txt' into table db2.my_table",
+	},{
+		input: "LOAD DATA INFILE 'data.txt' INTO TABLE db2.my_table (c1, c2, c3)",
+		output: "load data infile 'data.txt' into table db2.my_table (c1, c2, c3)",
+	},{
+		input: "LOAD DATA INFILE '/tmp/test.txt' INTO TABLE test IGNORE 1 LINES",
+		output: "load data infile '/tmp/test.txt' into table test ignore 1 lines",
 	}}
 	for _, tcase := range testCases {
 		p, err := Parse(tcase.input)
