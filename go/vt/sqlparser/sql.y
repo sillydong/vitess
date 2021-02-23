@@ -2999,7 +2999,7 @@ load_into_table_name:
   }
 
 into_table_name:
-INTO table_name
+  INTO table_name
   {
     $$ = $2
   }
