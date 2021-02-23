@@ -551,7 +551,6 @@ func (node *Load) Format(buf *TrackedBuffer) {
 		ignore = fmt.Sprintf(" ignore %v lines", node.IgnoreNum)
 	}
 
-	// TODO: Is there a better way to do this?
 	if node.IgnoreNum == nil && node.Columns != nil {
 		ignore = " "
 	} else if node.IgnoreNum != nil && node.Columns != nil {
