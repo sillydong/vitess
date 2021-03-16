@@ -2268,7 +2268,7 @@ func (node *Show) Format(buf *TrackedBuffer) {
 		}
 		return
 	}
-	if node.Type == "table status" {
+	if strings.ToLower(node.Type) == "table status" {
 		buf.Myprintf("show table status")
 		if node.Database != "" {
 			buf.Myprintf(" from %s", node.Database)
