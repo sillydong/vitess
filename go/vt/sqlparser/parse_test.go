@@ -165,9 +165,15 @@ var (
 		}, {
 			input: "select a from (select 1 as a from tbl1 union select 2 from tbl2) as t (a, b)",
 		}, {
+			input: "select a from (select 1 as a from tbl1 union select 2 from tbl2) as t(a, b)",
+			output: "select a from (select 1 as a from tbl1 union select 2 from tbl2) as t (a, b)",
+		}, {
 			input: "select a from (values row(1, 2), row('a', 'b')) as t (a, b)",
 		}, {
 			input: "select a from (values row(1, 2), row('a', 'b')) as t1 join (values row(3, 4), row('c', 'd')) as t2",
+		}, {
+			input: "select a from (values row(1, 2), row('a', 'b')) as t1(w, x) join (values row(3, 4), row('c', 'd')) as t2(y, z)",
+			output: "select a from (values row(1, 2), row('a', 'b')) as t1 (w, x) join (values row(3, 4), row('c', 'd')) as t2 (y, z)",
 		}, {
 			input: "select a from (values row(1, 2), row('a', 'b')) as t1 (w, x) join (values row(3, 4), row('c', 'd')) as t2 (y, z)",
 		}, {
