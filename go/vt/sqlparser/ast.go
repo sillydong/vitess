@@ -1655,7 +1655,7 @@ func (node *DDL) Format(buf *TrackedBuffer) {
 
 			temporary := ""
 			if node.Temporary {
-				temporary = " temporary"
+				temporary = " " + TemporaryStr
 			}
 
 			if node.OptLike != nil {
