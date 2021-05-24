@@ -1280,10 +1280,10 @@ create_table_prefix:
       ne = true
     }
 
-     var neTemp bool
-     if $2 != 0 {
-     	neTemp = true
-     }
+    var neTemp bool
+    if $2 != 0 {
+      neTemp = true
+    }
 
     $$ = &DDL{Action: CreateStr, Table: $5, IfNotExists: ne, Temporary: neTemp}
     setDDL(yylex, $$)
@@ -5019,6 +5019,7 @@ non_reserved_keyword:
 | SUBCLASS_ORIGIN
 | TABLES
 | TABLE_NAME
+| TEMPORARY
 | TEXT
 | THAN
 | THREAD_PRIORITY
