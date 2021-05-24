@@ -374,6 +374,7 @@ var keywords = map[string]int{
 	"rollback":            ROLLBACK,
 	"row":                 ROW,
 	"row_number":          ROW_NUMBER,
+	"temporary":		   TEMPORARY,
 	"savepoint":           SAVEPOINT,
 	"schema":              SCHEMA,
 	"schema_name":         SCHEMA_NAME,
