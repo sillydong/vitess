@@ -1571,6 +1571,9 @@ type DDL struct {
 
 	// Temporary is set for CREATE TEMPORARY TABLE operations.
 	Temporary bool
+
+	// OptSelect is set for CREATE TABLE <> AS SELECT operations.
+	OptSelect *OptSelect
 }
 
 // ColumnOrder is used in some DDL statements to specify or change the order of a column in a schema.
@@ -1802,6 +1805,29 @@ func (node *OptLike) walkSubtree(visit Visit) error {
 	}
 	return Walk(visit, node.LikeTable)
 }
+
+type OptSelect struct {
+	Select SelectStatement
+	As bool
+}
+
+// Format formats the node.
+func (node *OptSelect) Format(buf *TrackedBuffer) {
+	as := ""
+	if node.As {
+		as = "as "
+	}
+
+	buf.Myprintf("%s%v", as, node.Select)
+}
+
+func (node *OptSelect) walkSubtree(visit Visit) error {
+	if node == nil {
+		return nil
+	}
+	return Walk(visit, node.Select)
+}
+
 
 // PartitionSpec describe partition actions (for alter and create)
 type PartitionSpec struct {

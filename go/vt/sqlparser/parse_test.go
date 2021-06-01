@@ -3059,6 +3059,9 @@ func TestCreateTable(t *testing.T) {
 			"	b1 bool not null,\n" +
 			"	b2 boolean\n" +
 			")",
+
+		// create table AS (SELECT *) syntax
+		"create table t as select * from uv;",
 	}
 	for _, sql := range validSQL {
 		sql = strings.TrimSpace(sql)
