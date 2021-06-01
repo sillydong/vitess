@@ -480,7 +480,7 @@ stream_statement:
 
 // base_select is an unparenthesized SELECT with no order by clause or beyond.
 base_select:
- base_select_no_cte
+  base_select_no_cte
   {
     $$ = $1
   }
