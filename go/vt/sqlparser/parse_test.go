@@ -3059,13 +3059,6 @@ func TestCreateTable(t *testing.T) {
 			"	b1 bool not null,\n" +
 			"	b2 boolean\n" +
 			")",
-
-		// create table AS SELECT * syntax
-		"create table t as select * from uv",
-		"create table t select * from uv",
-		"create table t (\n" +
-			"	pk int\n" +
-			") select val from foo",
 	}
 	for _, sql := range validSQL {
 		sql = strings.TrimSpace(sql)
@@ -3479,6 +3472,34 @@ func TestCreateTableEscaped(t *testing.T) {
 			"\t`update` int,\n" +
 			"\tprimary key (`delete`)\n" +
 			")",
+	}}
+	for _, tcase := range testCases {
+		tree, err := ParseStrictDDL(tcase.input)
+		if err != nil {
+			t.Errorf("input: %s, err: %v", tcase.input, err)
+			continue
+		}
+		if got, want := String(tree.(*DDL)), tcase.output; got != want {
+			t.Errorf("Parse(%s):\n%s, want\n%s", tcase.input, got, want)
+		}
+	}
+}
+
+func TestCreateTableSelect(t *testing.T) {
+	testCases := []struct {
+		input  string
+		output string
+	}{{
+		input: "create table `t` as select * from `uv`",
+		output: "create table t as select * from uv",
+	}, {
+		input: "create table `t` select pk from `foo`",
+		output: "create table t select pk from foo",
+	}, {
+		input: "create table t (pk int) select val from foo",
+		output: "create table t (\n" +
+				"\tpk int\n" +
+			    ") select val from foo",
 	}}
 	for _, tcase := range testCases {
 		tree, err := ParseStrictDDL(tcase.input)
