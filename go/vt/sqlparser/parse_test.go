@@ -3060,7 +3060,7 @@ func TestCreateTable(t *testing.T) {
 			"	b2 boolean\n" +
 			")",
 
-		// create table AS (SELECT *) syntax
+		// create table AS SELECT * syntax
 		"create table t as select * from uv",
 		"create table t select * from uv",
 		"create table t (\n" +

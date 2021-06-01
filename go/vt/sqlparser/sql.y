@@ -347,7 +347,7 @@ func skipToEnd(yylex interface{}) {
 %type <str> ignore_opt default_opt
 %type <str> full_opt from_database_opt tables_or_processlist columns_or_fields
 %type <showFilter> like_or_where_opt
-%type <byt> exists_opt not_exists_opt sql_calc_found_rows_opt temp_opt
+%type <byt> exists_opt not_exists_opt sql_calc_found_rows_opt temp_opt as_opt_bool
 %type <str> key_type key_type_opt
 %type <empty> non_add_drop_or_rename_operation
 %type <empty> to_opt to_or_as as_opt column_opt describe
@@ -740,20 +740,15 @@ create_statement:
     }
     $$ = $1
   }
-| create_table_prefix select_statement
+| create_table_prefix as_opt_bool base_select_no_cte
   {
-   $1.OptSelect = &OptSelect{As: false, Select: $2}
+   $1.OptSelect = &OptSelect{As: false, Select: $3}
    $$ = $1
   }
 | create_table_prefix LIKE table_name
   {
     $1.OptLike = &OptLike{LikeTable: $3}
     $$ = $1
-  }
-| create_table_prefix AS select_statement
-  {
-   $1.OptSelect = &OptSelect{As: true, Select: $3}
-   $$ = $1
   }
 | CREATE key_type_opt INDEX sql_id using_opt ON table_name '(' index_column_list ')' index_option_list_opt
   {
@@ -3158,6 +3153,11 @@ as_opt:
   { $$ = struct{}{} }
 | AS
   { $$ = struct{}{} }
+
+as_opt_bool:
+  { $$ = 0 }
+| AS
+  { $$ = 1 }
 
 table_alias:
   table_id
