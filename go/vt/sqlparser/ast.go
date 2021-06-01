@@ -1663,8 +1663,12 @@ func (node *DDL) Format(buf *TrackedBuffer) {
 
 			if node.OptLike != nil {
 				buf.Myprintf("%s%s table%s %v %v", node.Action, temporary, notExists, node.Table, node.OptLike)
-			} else if node.TableSpec != nil {
+			} else if node.TableSpec != nil && node.OptSelect == nil {
 				buf.Myprintf("%s%s table%s %v %v", node.Action, temporary, notExists, node.Table, node.TableSpec)
+			} else if node.TableSpec != nil && node.OptSelect != nil {
+				buf.Myprintf("%s%s table%s %v %v%v", node.Action, temporary, notExists, node.Table, node.TableSpec, node.OptSelect)
+			} else if node.OptSelect != nil {
+				buf.Myprintf("%s%s table%s %v %v", node.Action, temporary, notExists, node.Table, node.OptSelect)
 			} else {
 				buf.Myprintf("%s%s table%s %v", node.Action, temporary, notExists, node.Table)
 			}

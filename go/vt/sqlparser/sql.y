@@ -740,6 +740,11 @@ create_statement:
     }
     $$ = $1
   }
+| create_table_prefix select_statement
+  {
+   $1.OptSelect = &OptSelect{As: false, Select: $2}
+   $$ = $1
+  }
 | create_table_prefix LIKE table_name
   {
     $1.OptLike = &OptLike{LikeTable: $3}

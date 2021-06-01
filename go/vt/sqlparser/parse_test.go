@@ -3061,7 +3061,11 @@ func TestCreateTable(t *testing.T) {
 			")",
 
 		// create table AS (SELECT *) syntax
-		"create table t as select * from uv;",
+		"create table t as select * from uv",
+		"create table t select * from uv",
+		"create table t (\n" +
+			"	pk int\n" +
+			") select val from foo",
 	}
 	for _, sql := range validSQL {
 		sql = strings.TrimSpace(sql)
