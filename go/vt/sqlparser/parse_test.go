@@ -3493,6 +3493,9 @@ func TestCreateTableSelect(t *testing.T) {
 		input: "create table `t` as select * from `uv`",
 		output: "create table t as select * from uv",
 	}, {
+		input: "create table `t` as select * from `uv` LIMIT 5",
+		output: "create table t as select * from uv limit 5",
+	}, {
 		input: "create table `t` select pk from `foo`",
 		output: "create table t select pk from foo",
 	}, {
