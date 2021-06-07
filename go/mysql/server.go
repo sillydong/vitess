@@ -507,7 +507,8 @@ func (c *Conn) writeHandshakeV10(serverVersion string, authServer AuthServer, en
 		CapabilityClientPluginAuth |
 		CapabilityClientPluginAuthLenencClientData |
 		CapabilityClientDeprecateEOF |
-		CapabilityClientConnAttr
+		CapabilityClientConnAttr |
+		CapabilityClientFoundRows
 	if enableTLS {
 		capabilities |= CapabilityClientSSL
 	}
