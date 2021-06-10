@@ -740,14 +740,10 @@ create_statement:
     }
     $$ = $1
   }
+  // TODO: Allow for table specs to be parsed here
 | create_table_prefix as_opt_bool create_query_expression
   {
-    var ne bool
-    if $2 != 0 {
-      ne = true
-    }
-
-    $1.OptSelect = &OptSelect{As: ne, Select: $3}
+    $1.OptSelect = &OptSelect{Select: $3}
     $$ = $1
   }
 | create_table_prefix LIKE table_name
@@ -792,6 +788,7 @@ create_statement:
     $$ = &DDL{Action: CreateStr, ProcedureSpec: &ProcedureSpec{Name: string($4), Definer: $2, Params: $6, Characteristics: $8, Body: $10}, SubStatementPositionStart: $9, SubStatementPositionEnd: $11 - 1}
   }
 
+// TODO: Implement IGNORE, REPLACE, VALUES, and TABLE
 create_query_expression:
   base_select_no_cte order_by_opt limit_opt lock_opt
   {
