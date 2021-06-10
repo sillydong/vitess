@@ -3485,6 +3485,54 @@ func TestCreateTableEscaped(t *testing.T) {
 	}
 }
 
+func TestCreateTableSelect(t *testing.T) {
+	testCases := []struct {
+		input  string
+		output string
+	}{{
+		input:  "create table `t` as select * from `uv`",
+		output: "create table t as select * from uv",
+	}, {
+		input:  "create table `t` as select * from `uv` LIMIT 5",
+		output: "create table t as select * from uv limit 5",
+	}, {
+		input:  "create table `t` select pk from `foo`",
+		output: "create table t as select pk from foo",
+	}}
+	// TODO: Table Specs with CREATE SELECT need to be fixed
+	//{
+	//	input: "create table t (pk int) select val from foo",
+	//	output: "create table t (\n" +
+	//			"\tpk int\n" +
+	//		    ") as select val from foo",
+	//}, {
+	//	input: "CREATE TEMPORARY TABLE t (INDEX my_index_name (tag, time), UNIQUE my_unique_index_name (order_number)) SELECT * FROM my_big_table WHERE my_val = 1",
+	//	output: "create table t(\n" +
+	//			"\tINDEX my_index_name (tag, time)\n" +
+	//		    "\tUNIQUE my_unique_index_name (order_number)\n" +
+	//			") as SELECT * FROM my_big_table WHERE my_val = 1",
+	//}, {
+	//	input: `CREATE TEMPORARY TABLE core.my_tmp_table (id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, value BIGINT UNSIGNED NOT NULL DEFAULT 0 UNIQUE, location VARCHAR(20) DEFAULT "NEEDS TO BE SET", country CHAR(2) DEFAULT "XX" COMMENT "Two-letter country code", INDEX my_index_name (location)) ENGINE=MyISAM SELECT * FROM core.my_big_table`,
+	//	output: "create temporary table core.my_tmp_table (id\n" +
+	//		    "\tint unsigned not null auto_increment primary key,\n" +
+	//			"\tvalue bigint unsigned not null default 0 unique,\n" +
+	//		    "\tlocation varchar(20) default \"need to be set\",\n" +
+	//			"\tcountry char(2) default \"XX\" comment \"Two-letter country code\",\n" +
+	//			"index my_index_name (location)\n" +
+	//			")engine=MyISAM SELECT * FROM core.my_big_table",
+	//},
+	for _, tcase := range testCases {
+		tree, err := ParseStrictDDL(tcase.input)
+		if err != nil {
+			t.Errorf("input: %s, err: %v", tcase.input, err)
+			continue
+		}
+		if got, want := String(tree.(*DDL)), tcase.output; got != want {
+			t.Errorf("Parse(%s):\n%s, want\n%s", tcase.input, got, want)
+		}
+	}
+}
+
 func TestLocks(t *testing.T) {
 	testCases := []struct {
 		input  string

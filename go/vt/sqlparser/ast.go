@@ -1580,6 +1580,9 @@ type DDL struct {
 
 	// Temporary is set for CREATE TEMPORARY TABLE operations.
 	Temporary bool
+
+	// OptSelect is set for CREATE TABLE <> AS SELECT operations.
+	OptSelect *OptSelect
 }
 
 // ColumnOrder is used in some DDL statements to specify or change the order of a column in a schema.
@@ -1670,7 +1673,13 @@ func (node *DDL) Format(buf *TrackedBuffer) {
 			if node.OptLike != nil {
 				buf.Myprintf("%s%s table%s %v %v", node.Action, temporary, notExists, node.Table, node.OptLike)
 			} else if node.TableSpec != nil {
-				buf.Myprintf("%s%s table%s %v %v", node.Action, temporary, notExists, node.Table, node.TableSpec)
+				if node.OptSelect == nil {
+					buf.Myprintf("%s%s table%s %v %v", node.Action, temporary, notExists, node.Table, node.TableSpec)
+				} else {
+					buf.Myprintf("%s%s table%s %v %v%v", node.Action, temporary, notExists, node.Table, node.TableSpec, node.OptSelect)
+				}
+			} else if node.OptSelect != nil {
+				buf.Myprintf("%s%s table%s %v %v", node.Action, temporary, notExists, node.Table, node.OptSelect)
 			} else {
 				buf.Myprintf("%s%s table%s %v", node.Action, temporary, notExists, node.Table)
 			}
@@ -1810,6 +1819,22 @@ func (node *OptLike) walkSubtree(visit Visit) error {
 		return nil
 	}
 	return Walk(visit, node.LikeTable)
+}
+
+type OptSelect struct {
+	Select SelectStatement
+}
+
+// Format formats the node.
+func (node *OptSelect) Format(buf *TrackedBuffer) {
+	buf.Myprintf("as %v", node.Select) // purposely display the AS
+}
+
+func (node *OptSelect) walkSubtree(visit Visit) error {
+	if node == nil {
+		return nil
+	}
+	return Walk(visit, node.Select)
 }
 
 // PartitionSpec describe partition actions (for alter and create)
