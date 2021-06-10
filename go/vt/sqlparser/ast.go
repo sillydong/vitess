@@ -148,10 +148,10 @@ func stringIsUnbrokenQuote(s string, quoteChar byte) bool {
 	numConsecutiveQuotes := 0
 	numConsecutiveEscapes := 0
 	for _, c := range ([]byte)(s[1 : len(s)-1]) {
-		if c == quoteChar && numConsecutiveEscapes % 2 == 0 {
+		if c == quoteChar && numConsecutiveEscapes%2 == 0 {
 			numConsecutiveQuotes++
 		} else {
-			if numConsecutiveQuotes % 2 != 0 {
+			if numConsecutiveQuotes%2 != 0 {
 				return false
 			}
 			numConsecutiveQuotes = 0
@@ -376,6 +376,8 @@ func (*Load) iStatement()              {}
 func (*Savepoint) iStatement()         {}
 func (*RollbackSavepoint) iStatement() {}
 func (*ReleaseSavepoint) iStatement()  {}
+func (*LockTables) iStatement()        {}
+func (*UnlockTables) iStatement()      {}
 
 // ParenSelect can actually not be a top level statement,
 // but we have to allow it because it's a requirement
@@ -394,9 +396,9 @@ type SelectStatement interface {
 	SQLNode
 }
 
-func (*Select) iSelectStatement()      {}
-func (*Union) iSelectStatement()       {}
-func (*ParenSelect) iSelectStatement() {}
+func (*Select) iSelectStatement()          {}
+func (*Union) iSelectStatement()           {}
+func (*ParenSelect) iSelectStatement()     {}
 func (*ValuesStatement) iSelectStatement() {}
 
 // Select represents a SELECT statement.
@@ -579,7 +581,7 @@ func (node *ParenSelect) walkSubtree(visit Visit) error {
 // ValuesStatement is a VALUES ROW('1', '2'), ROW(3, 4) expression, which can be a table factor or a stand-alone
 // statement
 type ValuesStatement struct {
-	Rows Values
+	Rows    Values
 	Columns Columns
 }
 
@@ -952,6 +954,7 @@ type Declare struct {
 
 // DeclareHandlerAction represents the action for the handler
 type DeclareHandlerAction string
+
 const (
 	DeclareHandlerAction_Continue DeclareHandlerAction = "continue"
 	DeclareHandlerAction_Exit     DeclareHandlerAction = "exit"
@@ -960,6 +963,7 @@ const (
 
 // DeclareHandlerConditionValue represents the condition values for a handler
 type DeclareHandlerConditionValue string
+
 const (
 	DeclareHandlerCondition_MysqlErrorCode DeclareHandlerConditionValue = "mysql_err_code"
 	DeclareHandlerCondition_SqlState       DeclareHandlerConditionValue = "sqlstate"
@@ -968,6 +972,7 @@ const (
 	DeclareHandlerCondition_NotFound       DeclareHandlerConditionValue = "not_found"
 	DeclareHandlerCondition_SqlException   DeclareHandlerConditionValue = "sqlexception"
 )
+
 // DeclareHandlerCondition represents the conditions for a handler
 type DeclareHandlerCondition struct {
 	ValueType      DeclareHandlerConditionValue
@@ -981,17 +986,20 @@ type DeclareCondition struct {
 	SqlStateValue  string
 	MysqlErrorCode *SQLVal
 }
+
 // DeclareCursor represents the DECLARE CURSOR statement
 type DeclareCursor struct {
 	Name       string
 	SelectStmt SelectStatement
 }
+
 // DeclareHandler represents the DECLARE HANDLER statement
 type DeclareHandler struct {
 	Action          DeclareHandlerAction
 	ConditionValues []DeclareHandlerCondition
 	Statement       Statement
 }
+
 // DeclareVariables represents the DECLARE statement for declaring variables
 type DeclareVariables struct {
 	Names   []ColIdent
@@ -1086,6 +1094,7 @@ type SignalInfo struct {
 
 // SignalConditionItemName represents the item name for the set conditions of a SIGNAL statement.
 type SignalConditionItemName string
+
 const (
 	SignalConditionItemName_ClassOrigin       SignalConditionItemName = "class_origin"
 	SignalConditionItemName_SubclassOrigin    SignalConditionItemName = "subclass_origin"
@@ -1341,8 +1350,8 @@ type Set struct {
 
 // Show.Scope
 const (
-	SessionStr  = "session"
-	GlobalStr   = "global"
+	SessionStr = "session"
+	GlobalStr  = "global"
 )
 
 // Format formats the node.
@@ -1744,7 +1753,7 @@ func (node *DDL) alterFormat(buf *TrackedBuffer) {
 				after = " after " + node.ColumnOrder.AfterColumn.String()
 			}
 		}
-		buf.Myprintf(" %s column %v %v%s",node.ColumnAction, node.Column, node.TableSpec, after)
+		buf.Myprintf(" %s column %v %v%s", node.ColumnAction, node.Column, node.TableSpec, after)
 	} else if node.ColumnAction == DropStr {
 		buf.Myprintf(" %s column %v", node.ColumnAction, node.Column)
 	} else if node.ColumnAction == RenameStr {
@@ -2435,9 +2444,9 @@ func (node *AutoIncSpec) walkSubtree(visit Visit) error {
 
 // DefaultSpec defines a SET / DROP on a column for its default value.
 type DefaultSpec struct {
-	Action   string
-	Column   ColIdent
-	Value    Expr
+	Action string
+	Column ColIdent
+	Value  Expr
 }
 
 var _ SQLNode = (*DefaultSpec)(nil)
@@ -3199,8 +3208,8 @@ type SimpleTableExpr interface {
 	SQLNode
 }
 
-func (TableName) iSimpleTableExpr() {}
-func (*Subquery) iSimpleTableExpr() {}
+func (TableName) iSimpleTableExpr()        {}
+func (*Subquery) iSimpleTableExpr()        {}
 func (*ValuesStatement) iSimpleTableExpr() {}
 
 // TableNames is a list of TableName.
@@ -4047,7 +4056,7 @@ func (node ValTuple) replace(from, to Expr) bool {
 
 // Subquery represents a subquery.
 type Subquery struct {
-	Select SelectStatement
+	Select  SelectStatement
 	Columns Columns
 }
 
@@ -4887,6 +4896,7 @@ func (node SetVarExprs) walkSubtree(visit Visit) error {
 
 // SetScope represents the scope of the set expression.
 type SetScope string
+
 const (
 	SetScope_None        SetScope = ""
 	SetScope_Global      SetScope = "global"
@@ -4999,8 +5009,8 @@ func VarScope(nameParts ...string) (string, SetScope, error) {
 		default:
 			// This catches `@@@GLOBAL.sys_var`. Due to the earlier check, this does not error on `@user.var`.
 			if strings.HasPrefix(nameParts[0], "@") {
-					// Last value is column name, so we return that in the error
-					return "", SetScope_None, fmt.Errorf("invalid system variable declaration `%s`", nameParts[1])
+				// Last value is column name, so we return that in the error
+				return "", SetScope_None, fmt.Errorf("invalid system variable declaration `%s`", nameParts[1])
 			}
 			return nameParts[1], SetScope_None, nil
 		}
@@ -5031,8 +5041,8 @@ func VarScope(nameParts ...string) (string, SetScope, error) {
 // SetVarExpr represents a set expression.
 type SetVarExpr struct {
 	Scope SetScope
-	Name *ColName
-	Expr Expr
+	Name  *ColName
+	Expr  Expr
 }
 
 // SetVarExpr.Expr, for SET TRANSACTION ... or START TRANSACTION
@@ -5314,6 +5324,63 @@ mustEscape:
 	}
 	buf.WriteByte('`')
 }
+
+// LockType is an enum for Lock Types
+type LockType string
+
+// TableAndLockType contains table and lock association
+type TableAndLockType struct {
+	Table TableExpr
+	Lock  LockType
+	SQLNode
+}
+
+func (node *TableAndLockType) Format(buf *TrackedBuffer) {
+	buf.Myprintf("%v %s", node.Table, node.Lock)
+}
+
+func (node *TableAndLockType) walkSubtree(visit Visit) error {
+	if node == nil {
+		return nil
+	}
+
+	return Walk(
+		visit,
+		node.Table)
+}
+
+type TableAndLockTypes []*TableAndLockType
+
+// LockTables represents the lock statement
+type LockTables struct {
+	Tables TableAndLockTypes
+	SQLNode
+}
+
+func (node *LockTables) Format(buf *TrackedBuffer) {
+	buf.WriteString("LOCK TABLES")
+	for _, lt := range node.Tables {
+		buf.Myprintf(" %v", lt)
+	}
+}
+
+func (node *LockTables) walkSubtree(visit Visit) error {
+	if node == nil {
+		return nil
+	}
+
+	for _, t := range node.Tables {
+		err := Walk(visit, t)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// UnlockTables represents the unlock statement
+type UnlockTables struct{}
 
 func compliantName(in string) string {
 	var buf strings.Builder
