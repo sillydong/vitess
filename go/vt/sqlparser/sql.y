@@ -152,7 +152,6 @@ func skipToEnd(yylex interface{}) {
   EnclosedBy *EnclosedBy
   tableAndLockType *TableAndLockType
   tableAndLockTypes TableAndLockTypes
-  lock 		Lock
   lockType LockType
 }
 
@@ -230,10 +229,10 @@ func skipToEnd(yylex interface{}) {
 %token <bytes> GEOMETRY POINT LINESTRING POLYGON GEOMETRYCOLLECTION MULTIPOINT MULTILINESTRING MULTIPOLYGON
 
 // Lock token
-%token <bytes> LOW_PRIORITY
+%token <bytes> LOCAL LOW_PRIORITY
 
 // Type Modifiers
-%token <bytes> NULLX AUTO_INCREMENT APPROXNUM SIGNED UNSIGNED ZEROFILL LOCAL
+%token <bytes> NULLX AUTO_INCREMENT APPROXNUM SIGNED UNSIGNED ZEROFILL
 
 // Supported SHOW tokens
 %token <bytes> COLLATION DATABASES SCHEMAS TABLES FULL PROCESSLIST COLUMNS FIELDS ENGINES PLUGINS
@@ -4718,27 +4717,31 @@ lock_table_list:
   }
 
 lock_table:
-  aliased_table_name lock_type
+  table_name lock_type
   {
-    $$ = &TableAndLockType{Table:$1, Lock:$2}
+    $$ = &TableAndLockType{Table:&AliasedTableExpr{Expr: $1}, Lock:$2}
+  }
+|  table_name AS table_alias lock_type
+  {
+    $$ = &TableAndLockType{Table:&AliasedTableExpr{Expr: $1, As: $3}, Lock:$4}
   }
 
 lock_type:
   READ
   {
-    $$ = "Read"
+    $$ = "read"
   }
 | READ LOCAL
   {
-    $$ = "ReadLocal"
+    $$ = "read local"
   }
 | WRITE
   {
-    $$ = "Write"
+    $$ = "write"
   }
 | LOW_PRIORITY WRITE
   {
-    $$ = "LowPriorityWrite"
+    $$ = "low_priority write"
   }
 
 unlock_statement:

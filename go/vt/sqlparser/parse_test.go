@@ -59,9 +59,9 @@ var (
 			input:  `select "'ain't'", '"hello"' from t`,
 			output: `select 'ain't', "hello" from t`,
 		}, {
-			input:  `select "1" + "2" from t`,
+			input: `select "1" + "2" from t`,
 		}, {
-			input:  `select '1' + "2" from t`,
+			input: `select '1' + "2" from t`,
 		}, {
 			input:  "select * from information_schema.columns",
 			output: "select * from information_schema.`columns`",
@@ -127,10 +127,10 @@ var (
 		}, {
 			input: "select /* @ */ @@a from b",
 		}, {
-			input: "select /* \\0 */ '\\0' from a",
+			input:                "select /* \\0 */ '\\0' from a",
 			serializeSelectExprs: true,
 		}, {
-			input: "select /* \\0 */ '\\0' from a",
+			input:  "select /* \\0 */ '\\0' from a",
 			output: "select /* \\0 */ \\0 from a",
 		}, {
 			input:                "select 1 /* drop this comment */ from t",
@@ -171,11 +171,11 @@ var (
 		}, {
 			input: "select a from (values row(1, 2), row('a', 'b')) as t1 (w, x) join (values row(3, 4), row('c', 'd')) as t2 (y, z)",
 		}, {
-		// TODO: These forms are not yet supported due to a grammar conflict
-		// 	input: "values row(1, 2), row('a', 'b')",
-		// }, {
-		// 	input: "values row(1, 2), row('a', 'b') union values row(3, 4), row('c', 'd')",
-		// }, {
+			// TODO: These forms are not yet supported due to a grammar conflict
+			// 	input: "values row(1, 2), row('a', 'b')",
+			// }, {
+			// 	input: "values row(1, 2), row('a', 'b') union values row(3, 4), row('c', 'd')",
+			// }, {
 			input: "select * from t1 join (select * from t2 union select * from t3) as t",
 		}, {
 			// Ensure this doesn't generate: ""select * from t1 join t2 on a = b join t3 on a = b".
@@ -241,7 +241,7 @@ var (
 		}, {
 			input: "select next :a values from t",
 		}, {
-			input: "select /* `By`.* */ `By`.* from t",
+			input:                "select /* `By`.* */ `By`.* from t",
 			serializeSelectExprs: true,
 		}, {
 			input: "select /* `By`.* */ `By`.* from t",
@@ -592,14 +592,14 @@ var (
 		}, {
 			input: "select /* a.b */ a.b from t",
 		}, {
-			input: "select /* a.b */ `a`.`b` from t",
+			input:  "select /* a.b */ `a`.`b` from t",
 			output: "select /* a.b */ a.b from t",
 		}, {
 			input: "select /* a.b.c */ a.b.c from t",
 		}, {
 			input: "select /* keyword a.b */ `By`.`bY` from t",
 		}, {
-			input: "select /* string */ 'a' from t",
+			input:  "select /* string */ 'a' from t",
 			output: "select /* string */ a from t",
 		}, {
 			input:                "select /* double quoted string */ \"a\" from t",
@@ -624,13 +624,13 @@ var (
 			input:  "select /* quote in double quoted string */ \"a'a\" from t",
 			output: "select /* quote in double quoted string */ a'a from t",
 		}, {
-			input: "select /* backslash quote in string */ 'a\\'a' from t",
+			input:  "select /* backslash quote in string */ 'a\\'a' from t",
 			output: "select /* backslash quote in string */ a\\'a from t",
 		}, {
-			input: "select /* literal backslash in string */ 'a\\\\na' from t",
+			input:  "select /* literal backslash in string */ 'a\\\\na' from t",
 			output: "select /* literal backslash in string */ a\\\\na from t",
 		}, {
-			input: "select /* all escapes */ '\\0\\'\\\"\\b\\n\\r\\t\\Z\\\\' from t",
+			input:  "select /* all escapes */ '\\0\\'\\\"\\b\\n\\r\\t\\Z\\\\' from t",
 			output: "select /* all escapes */ \\0\\'\\\"\\b\\n\\r\\t\\Z\\\\ from t",
 		}, {
 			input:                "select /* non-escape */ '\\x' from t",
@@ -640,10 +640,10 @@ var (
 			input:  "select /* non-escape */ '\\x' from t",
 			output: "select /* non-escape */ \\x from t",
 		}, {
-			input: "select /* unescaped backslash */ '\n' from t",
+			input:  "select /* unescaped backslash */ '\n' from t",
 			output: "select /* unescaped backslash */ \n from t",
 		}, {
-			input: "select /* escaped backslash */ '\\n' from t",
+			input:  "select /* escaped backslash */ '\\n' from t",
 			output: "select /* escaped backslash */ \\n from t",
 		}, {
 			input: "select /* value argument */ :a from t",
@@ -658,7 +658,7 @@ var (
 		}, {
 			input: "select /* positional argument */ ? from t",
 		}, {
-			input: "select /* positional argument */ ? from t limit ?",
+			input:                "select /* positional argument */ ? from t limit ?",
 			output:               "select /* positional argument */ :v1 from t limit :v2",
 			serializeSelectExprs: true,
 		}, {
@@ -774,8 +774,8 @@ var (
 		}, {
 			input: "select /* dual */ 1 from dual",
 		}, {
-			input:  "select * from (select 'tables') tables",
-			output: "select * from (select 'tables' from dual) as `tables`",
+			input:                "select * from (select 'tables') tables",
+			output:               "select * from (select 'tables' from dual) as `tables`",
 			serializeSelectExprs: true,
 		}, {
 			input:  "select * from (select 'tables') tables",
@@ -1138,7 +1138,7 @@ var (
 			input:  "alter table `By` rename `bY`",
 			output: "alter table `By` rename to `bY`",
 		}, {
-			input:  "alter table a rename to b",
+			input: "alter table a rename to b",
 		}, {
 			input:  "alter table a rename as b",
 			output: "alter table a rename to b",
@@ -1179,11 +1179,11 @@ var (
 			input:  "alter table a add column id int",
 			output: "alter table a add column (\n\tid int\n)",
 		}, {
-			input:  "alter table a add index idx (id)",
+			input: "alter table a add index idx (id)",
 		}, {
-			input:  "alter table a add fulltext index idx (id)",
+			input: "alter table a add fulltext index idx (id)",
 		}, {
-			input:  "alter table a add spatial index idx (id)",
+			input: "alter table a add spatial index idx (id)",
 		}, {
 			input:  "alter table a add foreign key (x) references y(z)",
 			output: "alter table a add foreign key (x) references y (z)",
@@ -1196,7 +1196,7 @@ var (
 			input:  "alter table a drop partition p2712",
 			output: "alter table a",
 		}, {
-			input:  "alter table a drop index idx",
+			input: "alter table a drop index idx",
 		}, {
 			input:  "alter table a add constraint check (b > 0)",
 			output: "alter table a add check (b > 0)",
@@ -1207,23 +1207,23 @@ var (
 			input:  "alter table a add constraint check (b > 0) not enforced",
 			output: "alter table a add check (b > 0) not enforced",
 		}, {
-			input:  "alter table a add constraint ch_1 check (b > 0)",
+			input: "alter table a add constraint ch_1 check (b > 0)",
 		}, {
 			input:  "alter table a add constraint ch_1 check (b > 0) enforced",
 			output: "alter table a add constraint ch_1 check (b > 0)",
 		}, {
-			input:  "alter table a add constraint ch_1 check (b > 0) not enforced",
+			input: "alter table a add constraint ch_1 check (b > 0) not enforced",
 		}, {
-			input:  "alter table a add check (b > 0)",
+			input: "alter table a add check (b > 0)",
 		}, {
-			input:  "alter table a drop check ch_1",
+			input: "alter table a drop check ch_1",
 		}, {
-			input:  "alter table a drop foreign key fk_something",
+			input: "alter table a drop foreign key fk_something",
 		}, {
 			input:  "alter table a drop primary key",
 			output: "alter table a",
 		}, {
-			input:  "alter table a drop constraint b",
+			input: "alter table a drop constraint b",
 		}, {
 			input:  "alter table a drop id",
 			output: "alter table a drop column id",
@@ -1244,7 +1244,7 @@ var (
 			input:  "create table a (a int, b char, c garbage)",
 			output: "create table a",
 		}, {
-			input:  "alter table a rename column a to b",
+			input: "alter table a rename column a to b",
 		}, {
 			input:  "alter table a rename column a as b",
 			output: "alter table a rename column a to b",
@@ -1648,11 +1648,11 @@ var (
 			input:  "optimize foo",
 			output: "otheradmin",
 		}, {
-			input:  "lock tables foo",
-			output: "otheradmin",
+			input:  "lock tables foo read",
+			output: "lock tables foo read",
 		}, {
-			input:  "unlock tables foo",
-			output: "otheradmin",
+			input:  "unlock tables",
+			output: "unlock tables",
 		}, {
 			input: "select /* EQ true */ 1 from t where a = true",
 		}, {
@@ -1717,13 +1717,13 @@ var (
 			input:  "select /* drop trailing semicolon */ 1 from dual;",
 			output: "select /* drop trailing semicolon */ 1 from dual",
 		}, {
-			input: "select /* cache directive */ sql_no_cache 'foo' from t",
+			input:  "select /* cache directive */ sql_no_cache 'foo' from t",
 			output: "select /* cache directive */ sql_no_cache foo from t",
 		}, {
-			input: "select /* sql_calc_rows directive */ sql_calc_found_rows 'foo' from t",
+			input:  "select /* sql_calc_rows directive */ sql_calc_found_rows 'foo' from t",
 			output: "select /* sql_calc_rows directive */ sql_calc_found_rows foo from t",
 		}, {
-			input: "select /* cache and sql_calc_rows directive */ sql_no_cache sql_calc_found_rows 'foo' from t",
+			input:  "select /* cache and sql_calc_rows directive */ sql_no_cache sql_calc_found_rows 'foo' from t",
 			output: "select /* cache and sql_calc_rows directive */ sql_no_cache sql_calc_found_rows foo from t",
 		}, {
 			input: "select binary 'a' = 'A' from t",
@@ -1979,7 +1979,7 @@ var (
 			input:  "alter table a modify foo int unique comment 'a comment here' auto_increment on update current_timestamp() default 0 not null after bar",
 			output: "alter table a modify column foo (\n\tfoo int not null default 0 on update current_timestamp() auto_increment comment 'a comment here' unique\n) after bar",
 		}, {
-			input:  "alter table t add column c int unique comment 'a comment here' auto_increment on update current_timestamp() default 0 not null," +
+			input: "alter table t add column c int unique comment 'a comment here' auto_increment on update current_timestamp() default 0 not null," +
 				" change foo bar int not null auto_increment first," +
 				" reorganize partition b into (partition c values less than (:v1), partition d values less than (maxvalue))," +
 				" add spatial index idx (id)",
@@ -2066,7 +2066,7 @@ end`,
 declare cond_name condition for 1002;
 end`,
 		}, {
-			input:  `create procedure p1 () begin
+			input: `create procedure p1 () begin
 declare cond_name condition for sqlstate '45000';
 end`,
 			output: `create procedure p1 () begin
@@ -2085,7 +2085,7 @@ end`,
 declare cur_name cursor for select i from test.t2;
 end`,
 		}, {
-			input:  `create procedure p1 () begin
+			input: `create procedure p1 () begin
 declare continue handler for sqlstate '45000', sqlstate value '45000' insert into test.t1 values (1, 1);
 end`,
 			output: `create procedure p1 () begin
@@ -2107,7 +2107,7 @@ end`,
 			input: `create procedure p1 () begin
 declare y datetime default now();
 end`,
-		},{
+		}, {
 			input: `create procedure p1 () begin
 declare x, y, z varchar(200) character set uft8mb4 default 'hi';
 end`,
@@ -2466,7 +2466,7 @@ func TestCaseSensitivity(t *testing.T) {
 			input:  "alter view A foo",
 			output: "alter table a",
 		}, {
-			input:  "alter table A rename to B",
+			input: "alter table A rename to B",
 		}, {
 			input: "rename table A to B",
 		}, {
@@ -2485,7 +2485,7 @@ func TestCaseSensitivity(t *testing.T) {
 		}, {
 			input: "select B.* from c",
 		}, {
-			input: "select B.A from c",
+			input:                "select B.A from c",
 			serializeSelectExprs: true,
 		}, {
 			input: "select B.A from c",
@@ -2624,14 +2624,14 @@ func TestKeywords(t *testing.T) {
 			input:  "select /* keyword in qualified id */ * from t join z on t.key = z.key",
 			output: "select /* keyword in qualified id */ * from t join z on t.`key` = z.`key`",
 		}, {
-			input:                "select /* non-reserved keywords as unqualified cols */ date, view, offset from t",
-			output:               "select /* non-reserved keywords as unqualified cols */ `date`, `view`, `offset` from t",
+			input:  "select /* non-reserved keywords as unqualified cols */ date, view, offset from t",
+			output: "select /* non-reserved keywords as unqualified cols */ `date`, `view`, `offset` from t",
 		}, {
-			input:                "select /* share and mode as cols */ share, mode from t where share = 'foo'",
-			output:               "select /* share and mode as cols */ `share`, `mode` from t where `share` = 'foo'",
+			input:  "select /* share and mode as cols */ share, mode from t where share = 'foo'",
+			output: "select /* share and mode as cols */ `share`, `mode` from t where `share` = 'foo'",
 		}, {
-			input:                "select /* unused keywords as cols */ write, virtual from t where trailing = 'foo'",
-			output:               "select /* unused keywords as cols */ `write`, `virtual` from t where `trailing` = 'foo'",
+			input:  "select /* unused keywords as cols */ write, virtual from t where trailing = 'foo'",
+			output: "select /* unused keywords as cols */ `write`, `virtual` from t where `trailing` = 'foo'",
 		}, {
 			input:                "select status from t",
 			output:               "select `status` from t",
@@ -3474,12 +3474,44 @@ func TestCreateTableEscaped(t *testing.T) {
 			")",
 	}}
 	for _, tcase := range testCases {
-		tree, err := ParseStrictDDL(tcase.input)
+		tree, err := Parse(tcase.input)
 		if err != nil {
 			t.Errorf("input: %s, err: %v", tcase.input, err)
 			continue
 		}
 		if got, want := String(tree.(*DDL)), tcase.output; got != want {
+			t.Errorf("Parse(%s):\n%s, want\n%s", tcase.input, got, want)
+		}
+	}
+}
+
+func TestLocks(t *testing.T) {
+	testCases := []struct {
+		input  string
+		output string
+	}{{
+		input:  "LOCK TABLES `t1` READ",
+		output: "lock tables t1 read",
+	}, {
+		input:  "LOCK TABLES `mytable` as `t` WRITE",
+		output: "lock tables mytable as t write",
+	}, {
+		input:  "LOCK TABLES t1 WRITE, t2 READ",
+		output: "lock tables t1 write, t2 read",
+	}, {
+		input:  "LOCK TABLES t1 LOW_PRIORITY WRITE, t2 READ LOCAL",
+		output: "lock tables t1 low_priority write, t2 read local",
+	}, {
+		input:  "LOCK TABLES t1 as table1 LOW_PRIORITY WRITE, t2 as table2 READ LOCAL",
+		output: "lock tables t1 as table1 low_priority write, t2 as table2 read local",
+	}, {
+		input:  "UNLOCK TABLES",
+		output: "unlock tables",
+	}}
+	for _, tcase := range testCases {
+		p, err := Parse(tcase.input)
+		require.NoError(t, err)
+		if got, want := String(p), tcase.output; got != want {
 			t.Errorf("Parse(%s):\n%s, want\n%s", tcase.input, got, want)
 		}
 	}

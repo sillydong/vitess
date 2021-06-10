@@ -5336,7 +5336,7 @@ type TableAndLockType struct {
 }
 
 func (node *TableAndLockType) Format(buf *TrackedBuffer) {
-	buf.Myprintf("%v %s", node.Table, node.Lock)
+	buf.Myprintf("%v %s", node.Table, string(node.Lock))
 }
 
 func (node *TableAndLockType) walkSubtree(visit Visit) error {
@@ -5358,9 +5358,13 @@ type LockTables struct {
 }
 
 func (node *LockTables) Format(buf *TrackedBuffer) {
-	buf.WriteString("LOCK TABLES")
-	for _, lt := range node.Tables {
-		buf.Myprintf(" %v", lt)
+	buf.WriteString("lock tables")
+	for i, lt := range node.Tables {
+		if i == 0 {
+			buf.Myprintf(" %v", lt)
+		} else {
+			buf.Myprintf(", %v", lt)
+		}
 	}
 }
 
@@ -5381,6 +5385,18 @@ func (node *LockTables) walkSubtree(visit Visit) error {
 
 // UnlockTables represents the unlock statement
 type UnlockTables struct{}
+
+func (node *UnlockTables) Format(buf *TrackedBuffer) {
+	buf.WriteString("unlock tables")
+}
+
+func (node *UnlockTables) walkSubtree(visit Visit) error {
+	if node == nil {
+		return nil
+	}
+
+	return nil
+}
 
 func compliantName(in string) string {
 	var buf strings.Builder
