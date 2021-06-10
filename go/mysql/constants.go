@@ -68,9 +68,8 @@ const (
 	// CLIENT_ODBC 1 << 6
 	// No special behavior since 3.22.
 
-	// CLIENT_LOCAL_FILES 1 << 7
-	// Client can use LOCAL INFILE request of LOAD DATA|XML.
-	// We do not set it.
+	// CapabilityClientLocalFiles is CLIENT_LOCAL_FILES. We can use LOCAL INFILE request of LOAD DATA|XML.
+	CapabilityClientLocalFiles = 1 << 7
 
 	// CLIENT_IGNORE_SPACE 1 << 8
 	// Parser can ignore spaces before '('.
@@ -501,6 +500,9 @@ const (
 // Originally found in include/mysql/mysql_com.h
 // See http://dev.mysql.com/doc/internals/en/status-flags.html
 const (
+	// ServerInTransaction is SERVER_STATUS_IN_TRANS (a transaction is active)
+	ServerInTransaction = 0x0001
+
 	// ServerStatusAutocommit is SERVER_STATUS_AUTOCOMMIT.
 	ServerStatusAutocommit = 0x0002
 
