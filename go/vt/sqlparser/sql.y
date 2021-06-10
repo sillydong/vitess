@@ -347,7 +347,7 @@ func skipToEnd(yylex interface{}) {
 %type <str> ignore_opt default_opt
 %type <str> full_opt from_database_opt tables_or_processlist columns_or_fields
 %type <showFilter> like_or_where_opt
-%type <byt> exists_opt not_exists_opt sql_calc_found_rows_opt temp_opt as_opt_bool
+%type <byt> exists_opt not_exists_opt sql_calc_found_rows_opt temp_opt
 %type <str> key_type key_type_opt
 %type <empty> non_add_drop_or_rename_operation
 %type <empty> to_opt to_or_as as_opt column_opt describe
@@ -741,7 +741,7 @@ create_statement:
     $$ = $1
   }
   // TODO: Allow for table specs to be parsed here
-| create_table_prefix as_opt_bool create_query_expression
+| create_table_prefix as_opt create_query_expression
   {
     $1.OptSelect = &OptSelect{Select: $3}
     $$ = $1
@@ -3164,11 +3164,6 @@ as_opt:
   { $$ = struct{}{} }
 | AS
   { $$ = struct{}{} }
-
-as_opt_bool:
-  { $$ = 0 }
-| AS
-  { $$ = 1 }
 
 table_alias:
   table_id
