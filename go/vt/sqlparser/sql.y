@@ -4745,19 +4745,19 @@ lock_table:
 lock_type:
   READ
   {
-    $$ = "read"
+    $$ = LockRead
   }
 | READ LOCAL
   {
-    $$ = "read local"
+    $$ = LockReadLocal
   }
 | WRITE
   {
-    $$ = "write"
+    $$ = LockWrite
   }
 | LOW_PRIORITY WRITE
   {
-    $$ = "low_priority write"
+    $$ = LockLowPriorityWrite
   }
 
 unlock_statement:

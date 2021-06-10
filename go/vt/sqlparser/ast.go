@@ -5353,6 +5353,13 @@ mustEscape:
 // LockType is an enum for Lock Types
 type LockType string
 
+const (
+	LockRead             LockType = "read"
+	LockWrite            LockType = "write"
+	LockReadLocal        LockType = "read local"
+	LockLowPriorityWrite LockType = "low_priority write"
+)
+
 // TableAndLockType contains table and lock association
 type TableAndLockType struct {
 	Table TableExpr

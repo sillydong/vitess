@@ -10629,25 +10629,25 @@ yydefault:
 		yyDollar = yyS[yypt-1 : yypt+1]
 //line sql.y:4747
 		{
-			yyVAL.lockType = "read"
+			yyVAL.lockType = LockRead
 		}
 	case 962:
 		yyDollar = yyS[yypt-2 : yypt+1]
 //line sql.y:4751
 		{
-			yyVAL.lockType = "read local"
+			yyVAL.lockType = LockReadLocal
 		}
 	case 963:
 		yyDollar = yyS[yypt-1 : yypt+1]
 //line sql.y:4755
 		{
-			yyVAL.lockType = "write"
+			yyVAL.lockType = LockWrite
 		}
 	case 964:
 		yyDollar = yyS[yypt-2 : yypt+1]
 //line sql.y:4759
 		{
-			yyVAL.lockType = "low_priority write"
+			yyVAL.lockType = LockLowPriorityWrite
 		}
 	case 965:
 		yyDollar = yyS[yypt-2 : yypt+1]
