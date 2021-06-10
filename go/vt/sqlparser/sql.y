@@ -228,7 +228,7 @@ func skipToEnd(yylex interface{}) {
 %token <bytes> BLOB TINYBLOB MEDIUMBLOB LONGBLOB JSON ENUM
 %token <bytes> GEOMETRY POINT LINESTRING POLYGON GEOMETRYCOLLECTION MULTIPOINT MULTILINESTRING MULTIPOLYGON
 
-// Lock token
+// Lock tokens
 %token <bytes> LOCAL LOW_PRIORITY
 
 // Type Modifiers

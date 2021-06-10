@@ -1648,12 +1648,6 @@ var (
 			input:  "optimize foo",
 			output: "otheradmin",
 		}, {
-			input:  "lock tables foo read",
-			output: "lock tables foo read",
-		}, {
-			input:  "unlock tables",
-			output: "unlock tables",
-		}, {
 			input: "select /* EQ true */ 1 from t where a = true",
 		}, {
 			input: "select /* EQ false */ 1 from t where a = false",
@@ -3538,6 +3532,9 @@ func TestLocks(t *testing.T) {
 		input  string
 		output string
 	}{{
+		input:  "lock tables foo read",
+		output: "lock tables foo read",
+	}, {
 		input:  "LOCK TABLES `t1` READ",
 		output: "lock tables t1 read",
 	}, {
@@ -3555,6 +3552,9 @@ func TestLocks(t *testing.T) {
 	}, {
 		input:  "UNLOCK TABLES",
 		output: "unlock tables",
+	}, {
+		input:  "LOCK TABLES `people` READ /*!32311 LOCAL */",
+		output: "lock tables people read local",
 	}}
 	for _, tcase := range testCases {
 		p, err := Parse(tcase.input)
