@@ -3474,7 +3474,7 @@ func TestCreateTableEscaped(t *testing.T) {
 			")",
 	}}
 	for _, tcase := range testCases {
-		tree, err := Parse(tcase.input)
+		tree, err := ParseStrictDDL(tcase.input)
 		if err != nil {
 			t.Errorf("input: %s, err: %v", tcase.input, err)
 			continue
