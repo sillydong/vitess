@@ -765,7 +765,7 @@ create_statement:
   }
 | CREATE key_type_opt INDEX sql_id using_opt ON table_name '(' index_column_list ')' index_option_list_opt
   {
-    $$ = &DDL{Action: AlterStr, Table: $7, IndexSpec: &IndexSpec{Action: CreateStr, ToName: $4, Using: $5, Type: $2, Columns: $9, Options: $11}}
+    $$ = &DDL{Action: AlterStr, Table: $7, IndexSpec: &IndexSpec{Action: CreateStr, ToName: $4, Using: $5, Type: $2, Columns: $9, Options: $11, Primary: false}}
   }
 | CREATE VIEW table_name AS lexer_position select_statement lexer_position
   {
@@ -2243,11 +2243,11 @@ alter_table_statement_part:
   }
 | ADD index_or_key name_opt using_opt '(' index_column_list ')' index_option_list_opt
   {
-    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: CreateStr, ToName: NewColIdent($3),  Using: $4, Columns: $6, Options: $8}}
+    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: CreateStr, ToName: NewColIdent($3),  Using: $4, Columns: $6, Options: $8, Primary: false}}
   }
 | ADD constraint_symbol_opt key_type index_or_key_opt name_opt using_opt '(' index_column_list ')' index_option_list_opt
   {
-    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: CreateStr, ToName: NewColIdent($5), Type: $3, Using: $6, Columns: $8, Options: $10}}
+    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: CreateStr, ToName: NewColIdent($5), Type: $3, Using: $6, Columns: $8, Options: $10, Primary: false}}
   }
 | DROP CONSTRAINT ID
   {
@@ -2261,11 +2261,11 @@ alter_table_statement_part:
   }
 | DROP index_or_key sql_id
   {
-    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: DropStr, ToName: $3}}
+    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: DropStr, ToName: $3, Primary: false}}
   }
 | RENAME index_or_key sql_id TO sql_id
   {
-    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: RenameStr, FromName: $3, ToName: $5}}
+    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: RenameStr, FromName: $3, ToName: $5, Primary: false}}
   }
 | MODIFY column_opt column_definition column_order_opt
   {
@@ -2313,6 +2313,16 @@ alter_table_statement_part:
   {
     $$ = &DDL{Action: AlterStr, DefaultSpec: &DefaultSpec{Action: DropStr, Column: $3}}
   }
+| DROP PRIMARY KEY
+  {
+    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: DropStr, Primary: true}}
+  }
+| ADD constraint_symbol_opt PRIMARY KEY '(' index_column_list ')' index_option_list_opt
+  {
+    ddl := &DDL{Action: AlterStr, ConstraintAction: AddStr, IndexSpec: &IndexSpec{Action: CreateStr}}
+    ddl.IndexSpec = &IndexSpec{Action: CreateStr, Using: NewColIdent(""), Type: UniqueStr, Columns: $6, Options: $8, Primary: true}
+    $$ = ddl
+  }
 
 column_order_opt:
   {
@@ -2341,7 +2351,6 @@ column_opt:
 
 ignored_alter_object_type:
   FOREIGN
-| PRIMARY
 | PARTITION
 
 partition_operation:
@@ -2399,7 +2408,7 @@ drop_statement:
   }
 | DROP INDEX sql_id ON table_name ddl_skip_to_end
   {
-    $$ = &DDL{Action: AlterStr, Table: $5, IndexSpec: &IndexSpec{Action: DropStr, ToName: $3}}
+    $$ = &DDL{Action: AlterStr, Table: $5, IndexSpec: &IndexSpec{Action: DropStr, ToName: $3, Primary: false}}
   }
 | DROP VIEW exists_opt view_name_list
   {
