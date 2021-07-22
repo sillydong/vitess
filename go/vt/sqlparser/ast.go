@@ -2297,7 +2297,7 @@ func (idx *IndexSpec) Format(buf *TrackedBuffer) {
 	case "create", "CREATE":
 		buf.Myprintf("add ")
 		if idx.Primary {
-			buf.Myprintf("primary key ")
+			buf.Myprintf("constraint %s primary key ", idx.ToName.val)
 		} else {
 			if idx.Type != "" {
 				buf.Myprintf("%s ", idx.Type)

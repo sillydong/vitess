@@ -398,7 +398,7 @@ func skipToEnd(yylex interface{}) {
 %type <partSpec> partition_operation
 %type <bytes> ignored_alter_object_type
 %type <ReferenceAction> fk_reference_action fk_on_delete fk_on_update
-%type <str> constraint_symbol_opt infile_opt
+%type <str> pk_symbol_opt constraint_symbol_opt infile_opt
 %type <exprs> call_param_list_opt
 %type <procedureParams> proc_param_list_opt proc_param_list
 %type <procedureParam> proc_param
@@ -765,7 +765,7 @@ create_statement:
   }
 | CREATE key_type_opt INDEX sql_id using_opt ON table_name '(' index_column_list ')' index_option_list_opt
   {
-    $$ = &DDL{Action: AlterStr, Table: $7, IndexSpec: &IndexSpec{Action: CreateStr, ToName: $4, Using: $5, Type: $2, Columns: $9, Options: $11, Primary: false}}
+    $$ = &DDL{Action: AlterStr, Table: $7, IndexSpec: &IndexSpec{Action: CreateStr, ToName: $4, Using: $5, Type: $2, Columns: $9, Options: $11}}
   }
 | CREATE VIEW table_name AS lexer_position select_statement lexer_position
   {
@@ -1918,10 +1918,10 @@ index_info:
     $$ = &IndexInfo{Type: string($1) + " " + string($2), Name: NewColIdent("PRIMARY"), Primary: true, Unique: true}
   }
 | CONSTRAINT ID PRIMARY KEY
-    {
-      $$ = &IndexInfo{Type: string($3) + " " + string($4), Name: NewColIdent("PRIMARY"), Primary: true, Unique: true}
-    }
-  | SPATIAL index_or_key name_opt
+  {
+    $$ = &IndexInfo{Type: string($3) + " " + string($4), Name: NewColIdent(string($2)), Primary: true, Unique: true}
+  }
+| SPATIAL index_or_key name_opt
   {
     $$ = &IndexInfo{Type: string($1) + " " + string($2), Name: NewColIdent($3), Spatial: true, Unique: false}
   }
@@ -2174,6 +2174,15 @@ constraint_symbol_opt:
     $$ = string($2)
   }
 
+pk_symbol_opt:
+  {
+    $$ = string("PRIMARY")
+  }
+| CONSTRAINT ID
+  {
+    $$ = string($2)
+  }
+
 alter_statement:
   alter_table_statement
 | alter_view_statement
@@ -2243,11 +2252,11 @@ alter_table_statement_part:
   }
 | ADD index_or_key name_opt using_opt '(' index_column_list ')' index_option_list_opt
   {
-    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: CreateStr, ToName: NewColIdent($3),  Using: $4, Columns: $6, Options: $8, Primary: false}}
+    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: CreateStr, ToName: NewColIdent($3),  Using: $4, Columns: $6, Options: $8}}
   }
 | ADD constraint_symbol_opt key_type index_or_key_opt name_opt using_opt '(' index_column_list ')' index_option_list_opt
   {
-    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: CreateStr, ToName: NewColIdent($5), Type: $3, Using: $6, Columns: $8, Options: $10, Primary: false}}
+    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: CreateStr, ToName: NewColIdent($5), Type: $3, Using: $6, Columns: $8, Options: $10}}
   }
 | DROP CONSTRAINT ID
   {
@@ -2261,11 +2270,11 @@ alter_table_statement_part:
   }
 | DROP index_or_key sql_id
   {
-    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: DropStr, ToName: $3, Primary: false}}
+    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: DropStr, ToName: $3}}
   }
 | RENAME index_or_key sql_id TO sql_id
   {
-    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: RenameStr, FromName: $3, ToName: $5, Primary: false}}
+    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: RenameStr, FromName: $3, ToName: $5}}
   }
 | MODIFY column_opt column_definition column_order_opt
   {
@@ -2317,10 +2326,10 @@ alter_table_statement_part:
   {
     $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: DropStr, Primary: true}}
   }
-| ADD constraint_symbol_opt PRIMARY KEY '(' index_column_list ')' index_option_list_opt
+| ADD pk_symbol_opt PRIMARY KEY '(' index_column_list ')' index_option_list_opt
   {
-    ddl := &DDL{Action: AlterStr, ConstraintAction: AddStr, IndexSpec: &IndexSpec{Action: CreateStr}}
-    ddl.IndexSpec = &IndexSpec{Action: CreateStr, Using: NewColIdent(""), Type: UniqueStr, Columns: $6, Options: $8, Primary: true}
+    ddl := &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: CreateStr}}
+    ddl.IndexSpec = &IndexSpec{Action: CreateStr, Using: NewColIdent(""), ToName: NewColIdent($2), Type: UniqueStr, Columns: $6, Options: $8, Primary: true}
     $$ = ddl
   }
 
@@ -2408,7 +2417,7 @@ drop_statement:
   }
 | DROP INDEX sql_id ON table_name ddl_skip_to_end
   {
-    $$ = &DDL{Action: AlterStr, Table: $5, IndexSpec: &IndexSpec{Action: DropStr, ToName: $3, Primary: false}}
+    $$ = &DDL{Action: AlterStr, Table: $5, IndexSpec: &IndexSpec{Action: DropStr, ToName: $3}}
   }
 | DROP VIEW exists_opt view_name_list
   {
