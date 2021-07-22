@@ -2298,7 +2298,7 @@ func (idx *IndexSpec) Format(buf *TrackedBuffer) {
 		buf.Myprintf("add ")
 		if idx.Primary {
 			buf.Myprintf("primary key ")
-        } else {
+		} else {
 			if idx.Type != "" {
 				buf.Myprintf("%s ", idx.Type)
 			}
