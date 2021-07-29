@@ -7282,7 +7282,7 @@ yydefault:
 		yyDollar = yyS[yypt-0 : yypt+1]
 //line sql.y:2178
 		{
-			yyVAL.str = string("PRIMARY")
+			yyVAL.str = string("")
 		}
 	case 402:
 		yyDollar = yyS[yypt-2 : yypt+1]
@@ -7473,14 +7473,14 @@ yydefault:
 		yyDollar = yyS[yypt-3 : yypt+1]
 //line sql.y:2326
 		{
-			yyVAL.ddl = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: DropStr, Primary: true}}
+			yyVAL.ddl = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: DropStr, Type: PrimaryStr}}
 		}
 	case 432:
 		yyDollar = yyS[yypt-8 : yypt+1]
 //line sql.y:2330
 		{
 			ddl := &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: CreateStr}}
-			ddl.IndexSpec = &IndexSpec{Action: CreateStr, Using: NewColIdent(""), ToName: NewColIdent(yyDollar[2].str), Type: UniqueStr, Columns: yyDollar[6].indexColumns, Options: yyDollar[8].indexOptions, Primary: true}
+			ddl.IndexSpec = &IndexSpec{Action: CreateStr, Using: NewColIdent(""), ToName: NewColIdent(yyDollar[2].str), Type: PrimaryStr, Columns: yyDollar[6].indexColumns, Options: yyDollar[8].indexOptions}
 			yyVAL.ddl = ddl
 		}
 	case 433:

@@ -2176,7 +2176,7 @@ constraint_symbol_opt:
 
 pk_symbol_opt:
   {
-    $$ = string("PRIMARY")
+    $$ = string("")
   }
 | CONSTRAINT ID
   {
@@ -2324,12 +2324,12 @@ alter_table_statement_part:
   }
 | DROP PRIMARY KEY
   {
-    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: DropStr, Primary: true}}
+    $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: DropStr, Type: PrimaryStr}}
   }
 | ADD pk_symbol_opt PRIMARY KEY '(' index_column_list ')' index_option_list_opt
   {
     ddl := &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: CreateStr}}
-    ddl.IndexSpec = &IndexSpec{Action: CreateStr, Using: NewColIdent(""), ToName: NewColIdent($2), Type: UniqueStr, Columns: $6, Options: $8, Primary: true}
+    ddl.IndexSpec = &IndexSpec{Action: CreateStr, Using: NewColIdent(""), ToName: NewColIdent($2), Type: PrimaryStr, Columns: $6, Options: $8}
     $$ = ddl
   }
 

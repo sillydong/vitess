@@ -1618,6 +1618,7 @@ const (
 	FulltextStr   = "fulltext"
 	SetStr        = "set"
 	TemporaryStr  = "temporary"
+	PrimaryStr    = "primary"
 )
 
 // Format formats the node.
@@ -2288,25 +2289,32 @@ type IndexSpec struct {
 	Columns []*IndexColumn
 	// Options contains the index options when creating an index
 	Options []*IndexOption
-	// Primary indicates a PRIMARY KEY create or delete operation
-	Primary bool
 }
 
 func (idx *IndexSpec) Format(buf *TrackedBuffer) {
 	switch idx.Action {
 	case "create", "CREATE":
 		buf.Myprintf("add ")
-		if idx.Primary {
-			buf.Myprintf("constraint %s primary key ", idx.ToName.val)
-		} else {
-			if idx.Type != "" {
+		if idx.Type != "" {
+			if idx.Type == PrimaryStr {
+				if idx.ToName.val == "" {
+					buf.Myprintf("primary key ")
+				} else {
+					buf.Myprintf("constraint %s primary key ", idx.ToName.val)
+				}
+			} else {
 				buf.Myprintf("%s ", idx.Type)
 			}
-			buf.Myprintf("index %s ", idx.ToName.val)
-			if idx.Using.val != "" {
-				buf.Myprintf("using %s ", idx.Using.val)
-			}
 		}
+
+		if idx.Type != PrimaryStr {
+			buf.Myprintf("index %s ", idx.ToName.val)
+		}
+
+		if idx.Using.val != "" {
+			buf.Myprintf("using %s ", idx.Using.val)
+		}
+
 		buf.Myprintf("(")
 		for i, col := range idx.Columns {
 			if i != 0 {
@@ -2331,7 +2339,7 @@ func (idx *IndexSpec) Format(buf *TrackedBuffer) {
 			}
 		}
 	case "drop", "DROP":
-		if idx.Primary {
+		if idx.Type == PrimaryStr {
 			buf.Myprintf("drop primary key")
 		} else {
 			buf.Myprintf("drop index %s", idx.ToName.val)

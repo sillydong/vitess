@@ -1188,12 +1188,11 @@ var (
 			input:  "alter table a add foreign key (x) references y(z)",
 			output: "alter table a add foreign key (x) references y (z)",
 		}, {
-			input:  "alter table a add primary key (a, b)",
-			output: "alter table a add constraint PRIMARY primary key (a, b)",
+			input: "alter table a add primary key (a, b)",
 		}, {
-			input:  "alter table a add constraint a_pk primary key (a, b)",
+			input: "alter table a add constraint a_pk primary key (a, b)",
 		}, {
-			input:  "alter table a drop primary key",
+			input: "alter table a drop primary key",
 		}, {
 			input: "alter table a drop column id",
 		}, {
