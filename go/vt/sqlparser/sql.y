@@ -398,7 +398,7 @@ func skipToEnd(yylex interface{}) {
 %type <partSpec> partition_operation
 %type <bytes> ignored_alter_object_type
 %type <ReferenceAction> fk_reference_action fk_on_delete fk_on_update
-%type <str> pk_symbol_opt constraint_symbol_opt infile_opt
+%type <str> pk_name_opt constraint_symbol_opt infile_opt
 %type <exprs> call_param_list_opt
 %type <procedureParams> proc_param_list_opt proc_param_list
 %type <procedureParam> proc_param
@@ -2174,7 +2174,7 @@ constraint_symbol_opt:
     $$ = string($2)
   }
 
-pk_symbol_opt:
+pk_name_opt:
   {
     $$ = string("")
   }
@@ -2326,7 +2326,7 @@ alter_table_statement_part:
   {
     $$ = &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: DropStr, Type: PrimaryStr}}
   }
-| ADD pk_symbol_opt PRIMARY KEY '(' index_column_list ')' index_option_list_opt
+| ADD pk_name_opt PRIMARY KEY '(' index_column_list ')' index_option_list_opt
   {
     ddl := &DDL{Action: AlterStr, IndexSpec: &IndexSpec{Action: CreateStr}}
     ddl.IndexSpec = &IndexSpec{Action: CreateStr, Using: NewColIdent(""), ToName: NewColIdent($2), Type: PrimaryStr, Columns: $6, Options: $8}
