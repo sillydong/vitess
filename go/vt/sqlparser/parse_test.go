@@ -2028,6 +2028,9 @@ var (
 		}, {
 			input:  "create definer = me procedure p1(v1 int) comment 'some_comment' not deterministic select now()",
 			output: "create definer = me procedure p1 (in v1 int) comment 'some_comment' not deterministic select now() from dual",
+		}, {
+			input:  "insert into x(status) values (42);",
+			output: "insert into x(`status`) values (42)",
 		},
 	}
 	// Any tests that contain multiple statements within the body (such as BEGIN/END blocks) should go here.

@@ -4928,7 +4928,6 @@ reserved_keyword:
 | WHERE
 | WINDOW
 | WITH
-| STATUS
 
 /*
   These are non-reserved Vitess, because they don't cause conflicts in the grammar.
@@ -5149,6 +5148,8 @@ non_reserved_keyword:
 | WRITE
 | YEAR
 | ZEROFILL
+| STATUS
+
 
 // Reserved keywords that cause grammar conflicts in some places, but are safe to use as column name / alias identifiers.
 // These keywords should also go in reserved_keyword.
@@ -5173,7 +5174,6 @@ column_name_safe_reserved_keyword:
 | PERCENT_RANK
 | RANK
 | ROW_NUMBER
-| STATUS
 | STD
 | STDDEV
 | STDDEV_POP
