@@ -2640,6 +2640,10 @@ func TestKeywords(t *testing.T) {
 			input:  "select /* unused keywords as cols */ write, virtual from t where trailing = 'foo'",
 			output: "select /* unused keywords as cols */ `write`, `virtual` from t where `trailing` = 'foo'",
 		}, {
+			input: "insert into x (status) values (42)",
+			output: "insert into x(`status`) values (42)",
+
+		}, {
 			input:                "select status from t",
 			output:               "select `status` from t",
 			serializeSelectExprs: true,

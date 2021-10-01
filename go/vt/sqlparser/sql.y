@@ -4374,19 +4374,19 @@ insert_data:
   }
 
 ins_column_list:
-  sql_id
+  reserved_sql_id
   {
     $$ = Columns{$1}
   }
-| sql_id '.' sql_id
+| reserved_sql_id '.' reserved_sql_id
   {
     $$ = Columns{$3}
   }
-| ins_column_list ',' sql_id
+| ins_column_list ',' reserved_sql_id
   {
     $$ = append($$, $3)
   }
-| ins_column_list ',' sql_id '.' sql_id
+| ins_column_list ',' reserved_sql_id '.' reserved_sql_id
   {
     $$ = append($$, $5)
   }
