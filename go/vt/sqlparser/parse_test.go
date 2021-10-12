@@ -2649,9 +2649,6 @@ func TestKeywords(t *testing.T) {
 			input:  "insert into x (status) values (42)",
 			output: "insert into x(`status`) values (42)",
 		}, {
-			input:  "insert into x (status) values (42)",
-			output: "insert into x(`status`) values (42)",
-		}, {
 			input:  "update x set status = 32 where status = 42",
 			output: "update x set status = 32 where `status` = 42",
 		}, {
