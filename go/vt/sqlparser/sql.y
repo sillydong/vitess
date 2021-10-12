@@ -4451,6 +4451,9 @@ assignment_expression:
   {
     $$ = &AssignmentExpr{Name: $1, Expr: $3}
   }
+| reserved_keyword '=' expression {
+    $$ = &AssignmentExpr{Name: &ColName{Name: NewColIdent(string($1))}, Expr: $3}
+  }
 
 set_list:
   set_expression
