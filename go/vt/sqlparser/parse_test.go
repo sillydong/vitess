@@ -1339,6 +1339,9 @@ var (
 			input:  "drop table b restrict",
 			output: "drop table b",
 		}, {
+			input:  "drop table b        ",
+			output: "drop table b",
+		}, {
 			input:  "drop view if exists a",
 			output: "drop view if exists a",
 		}, {
