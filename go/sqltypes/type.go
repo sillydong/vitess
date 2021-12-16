@@ -138,6 +138,7 @@ const (
 	Enum       = querypb.Type_ENUM
 	Set        = querypb.Type_SET
 	Geometry   = querypb.Type_GEOMETRY
+	Point      = querypb.Type_GEOMETRY
 	TypeJSON   = querypb.Type_JSON
 	Expression = querypb.Type_EXPRESSION
 )
