@@ -252,7 +252,7 @@ func skipToEnd(yylex interface{}) {
 %token <bytes> BEGIN START TRANSACTION COMMIT ROLLBACK SAVEPOINT WORK RELEASE
 
 // Type Tokens
-%token <bytes> BIT TINYINT SMALLINT MEDIUMINT INT INTEGER BIGINT INTNUM
+%token <bytes> BIT TINYINT SMALLINT MEDIUMINT INT INTEGER BIGINT INTNUM SERIAL
 %token <bytes> REAL DOUBLE FLOAT_TYPE DECIMAL NUMERIC DEC FIXED PRECISION
 %token <bytes> TIME TIMESTAMP DATETIME YEAR
 %token <bytes> CHAR VARCHAR BOOL CHARACTER VARBINARY NCHAR NVARCHAR NATIONAL VARYING
@@ -2124,6 +2124,10 @@ int_type:
   {
     $$ = ColumnType{Type: string($1)}
   }
+| SERIAL
+  {
+    $$ = ColumnType{Type: "bigint", Unsigned: true, NotNull: true, Autoincrement: true, KeyOpt: colKeyUnique}
+  }
 
 decimal_type:
 REAL float_length_opt
@@ -2537,9 +2541,14 @@ index_info:
   {
     $$ = &IndexInfo{Type: string($1) + " " + string($2), Name: NewColIdent($3), Spatial: true, Unique: false}
   }
-| CONSTRAINT UNIQUE index_or_key name_opt
+| CONSTRAINT name_opt UNIQUE index_or_key_opt name_opt
   {
-    $$ = &IndexInfo{Type: string($2) + " " + string($3), Name: NewColIdent($4), Unique: true}
+    var name string
+    name = $2
+    if name == "" {
+      name = $5
+    }
+    $$ = &IndexInfo{Type: string($3) + " " + string($4), Name: NewColIdent(name), Unique: true}
   }
 | UNIQUE index_or_key name_opt
   {
@@ -5810,6 +5819,7 @@ non_reserved_keyword:
 | BEFORE
 | BEGIN
 | BIGINT
+| SERIAL
 | BIT
 | BLOB
 | BOOL
